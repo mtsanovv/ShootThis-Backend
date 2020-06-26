@@ -6,6 +6,9 @@ This is the backend server, written in Java. The database used in the creation p
 
 **Please note that this is the backend version, the backbone of [ShootThis-Web](https://github.com/mtsanovv/ShootThis-Web).**
 
+## About the SQL file included
+This is the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
+
 ## Authors
 - Web Design: M. Tsanov
 - Game Design: S. Tsvetkov
