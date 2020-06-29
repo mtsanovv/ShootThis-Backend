@@ -1,0 +1,39 @@
+{
+    "origins": {
+        "//localhost": {
+            "ports": ["4424"],
+            "protocol": "http:"
+        }
+    },
+    "database": {
+        "main": {
+            "host": "localhost",
+            "port": 3306,
+            "username": "root",
+            "password": "",
+            "dbname": "shootthis"
+        }
+    },
+    "servers": {
+    
+        "login1": {
+            "address": "127.0.0.1",
+            "port": 9903,
+            "displayName": "Login Server",
+            "protocol": "http:",
+            "maxUsers": 1000,
+            "dbConnections": 20,
+            "type": "login"
+        },
+
+        "game1": {
+            "address": "127.0.0.1",
+            "port": 9903,
+            "displayName": "Sofia, BG",
+            "protocol": "http:",
+            "maxUsers": 200,
+            "dbConnections": 10,
+            "type": "login"
+        }
+    }
+}
