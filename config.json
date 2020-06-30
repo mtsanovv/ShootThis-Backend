@@ -1,7 +1,7 @@
 {
     "origins": {
         "//localhost": {
-            "ports": ["4424"],
+            "ports": ["80", "4424"],
             "protocol": "http:"
         }
     },
@@ -28,7 +28,7 @@
 
         "game1": {
             "address": "127.0.0.1",
-            "port": 9903,
+            "port": 9904,
             "displayName": "Sofia, BG",
             "protocol": "http:",
             "maxUsers": 200,
