@@ -1,6 +1,9 @@
 #NPM Package Lock
 package-lock.json
 
+#ShootThis-Backend erorr log
+error_log.txt
+
 # Logs
 logs
 *.log

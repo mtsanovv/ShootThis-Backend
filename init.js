@@ -1,7 +1,12 @@
 var params = process.argv;
 var config = require('./config.json');
+var logger = require('./util/logger.js');
+var cluster = require('./util/cluster.js');
 
-
+global.serverId;
+global.serverDetails;
+global.origins = [];
+global.players = [];
 
 if(params.length != 3)
   return console.log("Improper parameters specified. Please start the server like this: 'node init.js serverKey' ");
@@ -9,25 +14,19 @@ if(params.length != 3)
 
 var serverData = config["servers"][params[2]];
 
-if(serverData)
-{
-  global.serverId = params[2];
-  global.serverSpecs = serverData;
-}
-else
+if(!serverData)
 {
   var message =  "Invalid server. Available servers are: ";
   for(var i in config["servers"])
     message += i + " ";
   return console.log(message);
 }
-  
-/*var io = require('socket.io')();
 
-io.origins(["*:*"]);
-io.on('connection', client => {
-  console.log("user connected");
-  client.on('disconnect', () => { console.log("user disconnected"); });
-});
-io.listen(9903);*/
-console.log("ShootThis-Backend running " + params[2] + " on port " + serverData["port"]);
+global.serverId = params[2];
+global.serverDetails = serverData;
+
+for(var origin in config["origins"])
+  for(var port in config["origins"][origin].ports)
+    global.origins.push(config["origins"][origin].protocol + origin + ":" + config["origins"][origin]["ports"][port]);
+
+cluster.init();
