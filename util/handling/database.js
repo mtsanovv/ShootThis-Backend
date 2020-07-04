@@ -42,11 +42,7 @@ class Database
 			database: this.database
 		});
 
-        this.connection.connect = this.checkConnection();
-        this.connection.on('error', function(e) {
-            this.connection.release();
-            errorHandler.criticalError(e);
-        });
+        this.testConnection();
         
 		delete this.host;
 		delete this.user;
@@ -77,14 +73,6 @@ class Database
         });
     }
 
-    checkConnection(error) 
-    {
-        if(error)
-            errorHandler.criticalError(error);
-
-        this.testConnection();
-    }
-
     testConnection() 
     {
         this.executeQuery(this.testSQL, [], function(error, results, fields) {
@@ -103,11 +91,19 @@ class Database
 
     getColumnById(id, column, callback) 
     {
-        var query = "SELECT " + column + " FROM `users` WHERE ID = ?";
+        var query = "SELECT " + column + " FROM `users` WHERE id = ?";
 
         this.executeQuery(query, [id], function(error, results, fields) {
-            //errors are already handled by executeQuery, but if they require extra handling, it could be done here
             return callback(results[0][column]);
+        });
+    }
+
+    getColumnByUsername(username, column, callback) 
+    {
+        var query = "SELECT `username`, " + column + " FROM `users` WHERE `username` LIKE ?";
+
+        this.executeQuery(query, [username], function(error, results, fields) {
+            return callback(results[0]["username"], results[0][column]);
         });
     }
 }

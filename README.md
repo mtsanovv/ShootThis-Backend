@@ -8,9 +8,9 @@ This is the backend server, written in Node.js. The database used in the creatio
 
 ## Instructions
 
-*Assuming you have* ```npm``` *and Node.js installed:*]
+*Assuming you have* ```npm``` *and Node.js installed:*
 1. Install redis-server if you don't have it.
-2. Run ```npm install socket.io mysql2 socket.io-redis```
+2. Run ```npm install socket.io mysql2 socket.io-redis bcryptjs```
 3. You may need to set up a new database using the shootthis.sql file (that's only if you haven't done it for the frontend already).
 4. It is recommended that you set up a new database user that can access only the newly created database. Make sure to adjust its parameters such as max connections per hour and max user connections to allow enough DB connections for each server.
 5. Edit the configuration in config.json:

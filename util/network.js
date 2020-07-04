@@ -25,8 +25,12 @@ function userConnected(socket)
         global.players.push(player);
 
         logger.log("User connected, currently connected users: " + global.players.length);
+
         if(global.serverDetails.type == "login")
+        {
             login.handleConnection(player);
+            socket.on('loginExt', (requestType, args) => { login.handleLoginRequest(player, requestType, args); })
+        }
             
         else if(global.serverDetails.type == "game")
         {
@@ -43,8 +47,13 @@ function userConnected(socket)
 function userDisconnected(socket)
 {
     for(var player in global.players)
+    {
         if(global.players[player].socket == socket)
+        {
+            //if user is logged in, delete the login token
             global.players.splice(player, 1);
+        }
+    }
     logger.log("User disconnected, currently connected users: " + global.players.length);
 }
 module.exports.init = init;
