@@ -39,7 +39,9 @@ function handleLoginRequest(player, requestType, args)
 function handleCheckCookie(player, args)
 {
     player.database.getColumnByUsername(args[0], 'savedLoginCookie', (username, savedLoginCookie) => {
-        bcrypt.compare(savedLoginCookie, args[1], function(err, res) {
+        if(err)
+        {
+            bcrypt.compare(savedLoginCookie, args[1], function(err, res) {
             if(res === true)
             {
                 //generate a new random string, store it in db and send it to user
@@ -47,14 +49,33 @@ function handleCheckCookie(player, args)
             }
             else
                 player.socket.emit("loginExt", "slFail");
-        });
+            });
+        }
+        else
+        {
+            player.socket.emit("loginExt", "slFail");
+        }
     });
 }
 
 function handlePlayerLogin(player, args)
 {
     logger.log("login request from " + args[0] + " password " + args[1] + " saveAccount: " + args[2]);
-    player.socket.emit("loginExt", "lFail");
+    
+    player.database.getColumnByUsername(args[0], 'password', (username, password) => {
+    bcrypt.compare(args[1], password, function(err, res) {
+        if(res === true)
+        {
+            logger.log("Success");
+            //generate a new random string, store it in db and send it to user
+            //then initiate login sequence
+        }
+        else
+            player.socket.emit("loginExt", "lFail");
+        });
+    });
+   
+    //player.socket.emit("loginExt", "lFail");
 }
 
 module.exports.handleConnection = handleConnection;
