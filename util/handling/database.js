@@ -94,7 +94,10 @@ class Database
         var query = "SELECT " + column + " FROM `users` WHERE id = ?";
 
         this.executeQuery(query, [id], function(error, results, fields) {
-            return callback(results[0][column]);
+            if(error || !results.length)
+                return callback(true);
+            else
+                return callback(false, results[0][column]);
         });
     }
 
@@ -103,7 +106,10 @@ class Database
         var query = "SELECT `username`, " + column + " FROM `users` WHERE `username` LIKE ?";
 
         this.executeQuery(query, [username], function(error, results, fields) {
-            return callback(results[0]["username"], results[0][column]);
+            if(error || !results.length)
+                return callback(true);
+            else
+                return callback(false, results[0]["username"], results[0][column]);
         });
     }
 }

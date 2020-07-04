@@ -38,16 +38,21 @@ function handleLoginRequest(player, requestType, args)
 
 function handleCheckCookie(player, args)
 {
-    player.database.getColumnByUsername(args[0], 'savedLoginCookie', (username, savedLoginCookie) => {
-        bcrypt.compare(savedLoginCookie, args[1], function(err, res) {
-            if(res === true)
-            {
-                //generate a new random string, store it in db and send it to user
-                //then initiate login sequence
-            }
-            else
-                player.socket.emit("loginExt", "slFail");
-        });
+    player.database.getColumnByUsername(args[0], 'savedLoginCookie', (err, username, savedLoginCookie) => {
+        if(err)
+        {
+            bcrypt.compare(savedLoginCookie, args[1], function(err, res) {
+                if(res === true)
+                {
+                    //generate a new random string, store it in db and send it to user
+                    //then initiate login sequence
+                }
+                else
+                    player.socket.emit("loginExt", "slFail");
+            });
+        }
+        else
+            player.socket.emit("loginExt", "slFail");
     });
 }
 
