@@ -1,5 +1,7 @@
 var logger = require('../util/logger.js');
 var bcrypt = require('bcryptjs');
+var crypto = require('crypto');
+var config = require('../config.json');
 
 /* 
 LOGIN HANDLERS:
@@ -11,7 +13,8 @@ LOGIN HANDLERS:
 LOGIN SERVER RESPONSES:
     slFail => saved login failure to authenticate
     lFail => login failure to authenticate user
-    ls => login successful, args: encrypted loginToken
+    sCookie => save login cookie 
+    ls => login successful, args: username, encrypted loginToken, servers list
 */
 
 
@@ -38,44 +41,86 @@ function handleLoginRequest(player, requestType, args)
 
 function handleCheckCookie(player, args)
 {
-    player.database.getColumnByUsername(args[0], 'savedLoginCookie', (username, savedLoginCookie) => {
-        if(err)
+    player.database.getColumnsByUsername(args[0], ["savedLoginCookie", "savedLoginCookieValidUntil"], (err, savedLoginCookieArr) => {
+        if(!err)
         {
-            bcrypt.compare(savedLoginCookie, args[1], function(err, res) {
-            if(res === true)
+            if(new Date(savedLoginCookieArr["savedLoginCookieValidUntil"]).valueOf() > new Date().valueOf())
             {
-                //generate a new random string, store it in db and send it to user
-                //then initiate login sequence
+                bcrypt.compare(savedLoginCookieArr["savedLoginCookie"], args[1], function(err, res) {
+                    if(res === true)
+                        handleLoginSuccessful(player, args[0]);
+                    else
+                        player.socket.emit("loginExt", "slFail");
+                });
             }
             else
-                player.socket.emit("loginExt", "slFail");
-            });
+                player.database.updateColumnByUsername(args[0], "savedLoginCookie", "", (err) => {
+                    player.socket.emit("loginExt", "slFail");
+                });
         }
         else
-        {
             player.socket.emit("loginExt", "slFail");
-        }
     });
 }
 
 function handlePlayerLogin(player, args)
 {
-    logger.log("login request from " + args[0] + " password " + args[1] + " saveAccount: " + args[2]);
-    
-    player.database.getColumnByUsername(args[0], 'password', (username, password) => {
-    bcrypt.compare(args[1], password, function(err, res) {
-        if(res === true)
+    player.database.getColumnByUsername(args[0], 'password', (err, username, password) => {
+        if(!err)
         {
-            logger.log("Success");
-            //generate a new random string, store it in db and send it to user
-            //then initiate login sequence
+            bcrypt.compare(args[1], password, function(err, res) {
+                if(res === true)
+                {
+                    if(args[2])
+                    {
+                        crypto.randomBytes(48, function(err, buffer) {
+                            var token = buffer.toString('hex');
+                            player.database.updateColumnByUsername(args[0], "savedLoginCookie", token, (err) => {
+                                var date = new Date((new Date()).getTime() + 60*24*60*60*1000);
+		                        var nowDate = date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + " " + ('0' + date.getHours()).slice(-2) + ":" + ('0' + date.getMinutes()).slice(-2) + ":" + ('0' + date.getSeconds()).slice(-2);
+                                player.database.updateColumnByUsername(args[0], "savedLoginCookieValidUntil", nowDate, (err) => {
+                                    bcrypt.genSalt(10, function(err, salt) {
+                                        bcrypt.hash(token, salt, function(err, hash) {
+                                            player.socket.emit("loginExt", "sCookie", [username, hash]);
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    }
+                    handleLoginSuccessful(player, username);
+                }
+                else
+                    player.socket.emit("loginExt", "lFail");
+            });
         }
         else
             player.socket.emit("loginExt", "lFail");
+    });
+}
+
+function handleLoginSuccessful(player, username)
+{
+    crypto.randomBytes(48, function(err, buffer) {
+        var token = buffer.toString('hex');
+        player.database.updateColumnByUsername(username, "loginToken", token, (err) => {
+            var date = new Date((new Date()).getTime() + 10*60*1000);
+            var nowDate = date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2) + " " + ('0' + date.getHours()).slice(-2) + ":" + ('0' + date.getMinutes()).slice(-2) + ":" + ('0' + date.getSeconds()).slice(-2);
+            player.database.updateColumnByUsername(username, "loginTokenExpiry", nowDate, (err) => {
+                bcrypt.genSalt(10, function(err, salt) {
+                    bcrypt.hash(token, salt, function(err, hash) {
+                        var serverList = [];
+                        for(var server in config["servers"])
+                        {
+                            if(config["servers"][server].type == "game")
+                                serverList.push(config["servers"][server].protocol + config["servers"][server].publicAddress + ":" + config["servers"][server].port);
+                        }
+                        player.socket.emit("loginExt", "ls", [[username, hash], serverList]);
+                    });
+                });
+            });
         });
     });
-   
-    //player.socket.emit("loginExt", "lFail");
 }
 
 module.exports.handleConnection = handleConnection;

@@ -103,13 +103,37 @@ class Database
 
     getColumnByUsername(username, column, callback) 
     {
-        var query = "SELECT `username`, " + column + " FROM `users` WHERE `username` LIKE ?";
+        var query = "SELECT username, " + column + " FROM `users` WHERE `username` LIKE ?";
 
         this.executeQuery(query, [username], function(error, results, fields) {
             if(error || !results.length)
                 return callback(true);
             else
                 return callback(false, results[0]["username"], results[0][column]);
+        });
+    }
+
+    getColumnsByUsername(username, columns, callback) 
+    {
+        var query = "SELECT username, " + columns.join(", ") + " FROM `users` WHERE `username` LIKE ?";
+
+        this.executeQuery(query, [username], function(error, results, fields) {
+            if(error || !results.length)
+                return callback(true);
+            else
+                return callback(false, results[0]);
+        });
+    }
+
+    updateColumnByUsername(username, column, value, callback) 
+    {
+        var query = "UPDATE `users` SET " + column + " = ? WHERE `username` LIKE ?";
+
+        this.executeQuery(query, [value, username], function(error, results, fields) {
+            if(error || !results.length)
+                return callback(true);
+            else
+                return callback(false);
         });
     }
 }

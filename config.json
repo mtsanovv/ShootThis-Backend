@@ -24,15 +24,19 @@
             "displayName": "Login Server",
             "protocol": "http:",
             "maxUsers": 1000,
-            "dbConnections": 1,
+            "loginAttempts": 10,
+            "dbConnections": 20,
             "type": "login"
         },
         "game1": {
             "address": "127.0.0.1",
+            "publicAddress": "//localhost",
             "port": 9904,
             "displayName": "Sofia, BG",
             "protocol": "http:",
             "maxUsers": 200,
+            "maxPlayersPerMatch": 30,
+            "loginAttempts": 2,
             "dbConnections": 10,
             "type": "game"
         }

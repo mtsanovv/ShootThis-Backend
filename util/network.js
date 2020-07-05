@@ -2,6 +2,7 @@ var logger = require('./logger.js');
 var db = require('./handling/dbHandling.js');
 var Player = require('../game/player.js');
 var login = require('../game/login.js');
+var world = require('../game/world.js');
 
 function init(io)
 {
@@ -24,17 +25,18 @@ function userConnected(socket)
 
         global.players.push(player);
 
-        logger.log("User connected, currently connected users: " + global.players.length);
+        logger.log("User connected");
 
         if(global.serverDetails.type == "login")
         {
             login.handleConnection(player);
-            socket.on('loginExt', (requestType, args) => { login.handleLoginRequest(player, requestType, args); })
+            socket.on('loginExt', (requestType, args) => { login.handleLoginRequest(player, requestType, args); });
         }
             
         else if(global.serverDetails.type == "game")
         {
-            //handle game
+            world.handleConnection(player);
+            socket.on('gameExt', (requestType, args) => { world.handleWorldPacket(player, requestType, args); });
         }
     }
     else
