@@ -130,7 +130,19 @@ class Database
         var query = "UPDATE `users` SET " + column + " = ? WHERE `username` LIKE ?";
 
         this.executeQuery(query, [value, username], function(error, results, fields) {
-            if(error || !results.length)
+            if(error)
+                return callback(true);
+            else
+                return callback(false);
+        });
+    }
+
+    joinedWorldByUsername(username, callback) 
+    {
+        var query = "INSERT INTO `loginhistory` (`id`, `username`, `time`, `world`) VALUES (NULL, ? , current_timestamp(), ?); ";
+
+        this.executeQuery(query, [username, global.serverId], function(error, results, fields) {
+            if(error)
                 return callback(true);
             else
                 return callback(false);

@@ -49,13 +49,8 @@ function userConnected(socket)
 function userDisconnected(socket)
 {
     for(var player in global.players)
-    {
         if(global.players[player].socket == socket)
-        {
-            //if user is logged in, delete the login token
             global.players.splice(player, 1);
-        }
-    }
-    logger.log("User disconnected, currently connected users: " + global.players.length);
+    logger.log("User disconnected");
 }
 module.exports.init = init;

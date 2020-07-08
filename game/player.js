@@ -19,6 +19,11 @@ class Player
     {
         this.database = db.getDb();
     }
+
+    loadPlayer()
+    {
+        
+    }
 }
 
 module.exports = Player;
