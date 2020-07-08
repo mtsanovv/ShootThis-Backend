@@ -21,9 +21,11 @@ This is the backend server, written in Node.js. The database used in the creatio
 6. Run redis-server.
 7. To run one of the servers on the current machine, use ```node init.js serverKey```. For example, ```node init.js login1```.
 8. To run more than one server, simply open another Terminal and perform step 7 again for the other server.
+9. **There is the chance of having bruteforce attempts on login. Thus, you need to set up a firewall filtering packets on login server (and perhaps game server as well).**
 
-## About the SQL file included
-This is the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
+## Important notes
+- There was an intention to create a system that locks out user after faling X login attempts. However, this is ineffective as it may be easily voided or may prevent the actual user from logging in. **This is why the best solution to the issue of eventual bruteforce is to set up some firewall rules.** ConfigServer Firewall (CSF) on some Linux distros has some useful perks for this, such as limiting connections that can be created from a IP per second, as well as sockets that could be opened in a specific port per second. Read more here: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-config-server-firewall-csf-on-ubuntu
+- The SQL file included contains the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
 
 ## Authors
 - Web Design: M. Tsanov
