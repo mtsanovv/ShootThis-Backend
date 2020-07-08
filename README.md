@@ -2,7 +2,7 @@
 
 A 2D HTML5 shooter, using the [Phaser 3](https://github.com/photonstorm/phaser/) engine.
 
-This is the backend server, written in Node.js. The database used in the creation process was MariaDB, a fork of MySQL. The storage engine used was InnoDB.
+This is the backend server, written in Node.js. The database used in the creation process is MariaDB, a fork of MySQL. The storage engine used is InnoDB.
 
 **Please note that this is the backend version, the backbone of [ShootThis-Web](https://github.com/mtsanovv/ShootThis-Web).**
 
