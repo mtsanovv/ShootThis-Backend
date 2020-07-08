@@ -25,7 +25,7 @@ function handleWorldPacket(player, requestType, args)
     switch(requestType)
     {
         case "p":
-            player.socket.emit("gameExt", "p");
+            player.socket.emit("gameExt", "p", [global.serverDetails.displayName]);
             break;
         case "joinServer":
             handleJoinServer(player, args);
@@ -50,7 +50,8 @@ function handleJoinServer(player, args)
                         if(res === true)
                         {
                             player.socket.emit("gameExt", "joinOk");
-                            player.database.joinedWorldByUsername(args[0], (err) => {});
+                            player.database.joinedWorldByUsername(args[0], player.IP, (err) => {});
+                            player.database.updateColumnByUsername(args[0], "ip", player.IP, (err) => {});
                             player.loadPlayer();
                         }
                         else
@@ -64,6 +65,20 @@ function handleJoinServer(player, args)
     });
 }
 
+function handleDisconnection(socket)
+{
+    for(var player in global.players)
+    {
+        if(global.players[player].socket == socket)
+        {
+            //disconnect from matches if inside a match etc
+            global.players.splice(player, 1);
+        }
+    }
+    logger.log("User disconnected");
+}
+
 
 module.exports.handleConnection = handleConnection;
 module.exports.handleWorldPacket = handleWorldPacket;
+module.exports.handleDisconnection = handleDisconnection;
