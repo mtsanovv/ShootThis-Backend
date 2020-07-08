@@ -11,7 +11,7 @@ class Player
         this.savedLoginCookie;
         this.loginToken;
         this.socket = socket;
-        this.IP = socket.handshake.address;
+        this.IP = socket.request.connection.remoteAddress;
         this.database;
     }
 

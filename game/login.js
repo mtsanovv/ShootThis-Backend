@@ -123,5 +123,14 @@ function handleLoginSuccessful(player, username)
     });
 }
 
+function handleDisconnection(socket)
+{
+    for(var player in global.players)
+        if(global.players[player].socket == socket)
+            global.players.splice(player, 1);
+    logger.log("User disconnected");
+}
+
 module.exports.handleConnection = handleConnection;
 module.exports.handleLoginRequest = handleLoginRequest;
+module.exports.handleDisconnection = handleDisconnection;

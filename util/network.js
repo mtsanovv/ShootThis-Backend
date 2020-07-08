@@ -15,7 +15,7 @@ function init(io)
 function userConnected(socket)
 {
     for(var player in global.players)
-        if(global.players[player].IP == socket.handshake.address)
+        if(global.players[player].IP == socket.request.connection.remoteAddress)
             global.players[player].socket.disconnect();
     
     if(global.players.length + 1 <= global.serverDetails.maxUsers)
@@ -48,9 +48,9 @@ function userConnected(socket)
 
 function userDisconnected(socket)
 {
-    for(var player in global.players)
-        if(global.players[player].socket == socket)
-            global.players.splice(player, 1);
-    logger.log("User disconnected");
+    if(global.serverDetails.type == "login")
+        login.handleDisconnection(socket);
+    else if(global.serverDetails.type == "game")
+        world.handleDisconnection(socket);
 }
 module.exports.init = init;

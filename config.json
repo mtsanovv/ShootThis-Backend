@@ -24,7 +24,6 @@
             "displayName": "Login Server",
             "protocol": "http:",
             "maxUsers": 1000,
-            "loginAttempts": 10,
             "dbConnections": 20,
             "type": "login"
         },
@@ -34,9 +33,8 @@
             "port": 9904,
             "displayName": "Sofia, BG",
             "protocol": "http:",
-            "maxUsers": 200,
-            "maxPlayersPerMatch": 30,
-            "loginAttempts": 2,
+            "maxUsers": 225,
+            "maxPlayersPerMatch": 15,
             "dbConnections": 10,
             "type": "game"
         }

@@ -13,7 +13,6 @@ class Database
         this.database;
         this.testSQL;
         this.connection;
-        this.pools;
     }
 
     init() 
@@ -24,8 +23,6 @@ class Database
         this.database = config.database.dbname;
         this.testSQL = config.database.testSQL;
 
-        this.pools = global.serverDetails.dbConnections;
-
         this.connect();
     }
 
@@ -35,7 +32,7 @@ class Database
             errorHandler.criticalError(new Error("Improper MySQL configuration"));
 
 		this.connection = mysql.createPool({
-            connectionLimit: this.pools,
+            connectionLimit: global.serverDetails.dbConnections,
 			host: this.host,
 			user: this.user,
 			password: this.password,
@@ -137,11 +134,11 @@ class Database
         });
     }
 
-    joinedWorldByUsername(username, callback) 
+    joinedWorldByUsername(username, ip, callback) 
     {
-        var query = "INSERT INTO `loginhistory` (`id`, `username`, `time`, `world`) VALUES (NULL, ? , current_timestamp(), ?); ";
+        var query = "INSERT INTO `loginhistory` (`id`, `username`, `time`, `world`, `ip`) VALUES (NULL, ? , current_timestamp(), ? , ?); ";
 
-        this.executeQuery(query, [username, global.serverId], function(error, results, fields) {
+        this.executeQuery(query, [username, global.serverId, ip], function(error, results, fields) {
             if(error)
                 return callback(true);
             else

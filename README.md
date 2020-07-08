@@ -21,7 +21,7 @@ This is the backend server, written in Node.js. The database used in the creatio
 6. Run redis-server.
 7. To start one of the servers on the current machine, use ```node init.js serverKey```. For example, ```node init.js login1```.
 8. To start more than one server, simply open another Terminal and perform step 7 again for the other server.
-9. **There is the chance of having bruteforce attempts on login. Thus, you need to set up a firewall filtering packets on login and game server as well).**
+9. **There is the chance of having bruteforce attempts on login. Thus, you need to set up a firewall filtering packets on login and game server as well.**
 
 ## Important notes
 ```diff 
