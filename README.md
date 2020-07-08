@@ -38,7 +38,6 @@ This is the backend server, written in Node.js. The database used in the creatio
 - Backend: M. Tsanov, Y. Berov
 
 ## Credits
-- Socket.IO: https://github.com/socketio
 - Server structure ideas, database manager and a few other snippets: https://github.com/HagridHD/Auroris/
 
 *M. Tsanov, S. Tsvetkov, Y. Berov, 2020*
