@@ -24,6 +24,10 @@ This is the backend server, written in Node.js. The database used in the creatio
 9. **There is the chance of having bruteforce attempts on login. Thus, you need to set up a firewall filtering packets on login and game server as well).**
 
 ## Important notes
+```diff 
+By default, the client-server connection is configured as http, which is EXTREMELY insecure BECAUSE PASSWORDS ARE SENT IN PLAINTEXT. ALWAYS USE HTTPS WHENEVER SENDING PLAINTEXT PASSWORDS!
+```
+
 - There was an intention to create a system that locks out the user after failing X login attempts. However, this is ineffective as it may be easily voided or may prevent the actual user from logging in. **This is why the best solution to the issue of eventual bruteforce is to set up some firewall rules.** ConfigServer Firewall (CSF) for some Linux distros has some useful perks for this, such as limiting connections that can be created from an IP per time period and number of connections that can be opened on a specific port per time period. Read more here: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-config-server-firewall-csf-on-ubuntu
 - The SQL file included contains the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
 
