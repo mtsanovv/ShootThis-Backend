@@ -34,7 +34,7 @@ This is the backend server, written in Node.js. The database used in the creatio
 ## Authors
 - Web Design: M. Tsanov
 - Game Design: S. Tsvetkov
-- Graphics Design: M. Tsanov, S. Tsvetkov
+- Artwork: M. Tsanov, S. Tsvetkov
 - Backend: M. Tsanov, Y. Berov
 
 ## Credits
