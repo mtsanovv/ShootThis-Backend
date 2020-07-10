@@ -1,6 +1,6 @@
 var mysql = require('mysql2');
-var config = require('../../config.json');
-var logger = require('../logger.js');
+var config = require('../config.json');
+var logger = require('./logger.js');
 var errorHandler = require('./unhandledError.js');
 
 class Database

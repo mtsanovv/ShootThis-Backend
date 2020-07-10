@@ -2,13 +2,15 @@ var logger = require('../util/logger.js');
 var bcrypt = require('bcryptjs');
 
 /* 
-WORLD HANDLERS:
+gameExt HANDLERS:
     p => ping
     joinServer => handleJoinServer
 */
 
+//match packets are in the match ext
+
 /*
-WORLD SERVER RESPONSES:
+gameExt SERVER RESPONSES:
     p => pong
     joinOk => user has joined successfully the server
     joinFail => user cannot be authenticated, disconnect after that
@@ -31,7 +33,7 @@ function handleWorldPacket(player, requestType, args)
             handleJoinServer(player, args);
             break;
         default:
-            logger.log("Invalid handler (request type): " + requestType, 'w');
+            logger.log("Invalid gameExt handler: " + requestType, 'w');
             break;
     }
 }
@@ -44,7 +46,10 @@ function handleJoinServer(player, args)
             bcrypt.compare(result["loginToken"], args[1], function(err, res) {
                 player.database.updateColumnByUsername(args[0], 'loginToken', '', (err) => {
                     if(err)
+                    {
                         player.socket.emit("gameExt", "joinFail");
+                        player.socket.disconnect();
+                    }
                     else
                     {
                         if(res === true)
@@ -55,13 +60,19 @@ function handleJoinServer(player, args)
                             player.loadPlayer();
                         }
                         else
+                        {
                             player.socket.emit("gameExt", "joinFail");
+                            player.socket.disconnect();
+                        }
                     }
                 });
             });
         }
         else
+        {
             player.socket.emit("gameExt", "joinFail");
+            player.socket.disconnect();
+        }
     });
 }
 
@@ -75,7 +86,7 @@ function handleDisconnection(socket)
             global.players.splice(player, 1);
         }
     }
-    logger.log("User disconnected");
+    logger.log("User disconnected " + global.players.length);
 }
 
 

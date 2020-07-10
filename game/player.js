@@ -1,5 +1,5 @@
 var logger = require('../util/logger.js');
-var db = require('../util/handling/dbHandling.js');
+var db = require('../util/databaseInterface.js');
 
 class Player
 {
