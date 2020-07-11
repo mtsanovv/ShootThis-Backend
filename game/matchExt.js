@@ -1,5 +1,4 @@
 var logger = require('../util/logger.js');
-var bcrypt = require('bcryptjs');
 
 /* 
 matchExt HANDLERS:
