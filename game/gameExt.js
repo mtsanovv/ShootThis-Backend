@@ -57,7 +57,7 @@ function handleJoinServer(player, args)
                             player.socket.emit("gameExt", "joinOk");
                             player.database.joinedWorldByUsername(args[0], player.IP, (err) => {});
                             player.database.updateColumnByUsername(args[0], "ip", player.IP, (err) => {});
-                            player.loadPlayer();
+                            player.loadPlayer(args[0]);
                         }
                         else
                         {
@@ -86,7 +86,7 @@ function handleDisconnection(socket)
             global.players.splice(player, 1);
         }
     }
-    logger.log("User disconnected " + global.players.length);
+    logger.log("User disconnected");
 }
 
 
