@@ -8,11 +8,10 @@ class Player
         this.id;
         this.username;
         this.nickname;
-        this.savedLoginCookie;
-        this.loginToken;
         this.socket = socket;
         this.IP = socket.request.connection.remoteAddress;
         this.database;
+        this.playerData;
     }
 
     init()
@@ -20,9 +19,15 @@ class Player
         this.database = db.getDb();
     }
 
-    loadPlayer()
+    loadPlayer(username)
     {
-        
+        this.database.getColumnsByUsername(username, ['id', 'username', 'nickname', 'playerData'], (err, result) => {
+            this.id = result['id'];
+            this.username = result['username'];
+            this.nickname = result['nickname'];
+            this.playerData = JSON.parse(result['playerData']); 
+        });
+       
     }
 }
 
