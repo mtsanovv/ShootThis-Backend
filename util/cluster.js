@@ -3,8 +3,8 @@ var os = require('os');
 var config = require('../config.json');
 var logger = require('./logger.js');
 var network = require('./network.js');
-var errorHandling = require('./handling/unhandledError.js');
-var dbHandling = require('./handling/dbHandling.js');
+var errorHandling = require('./unhandledError.js');
+var dbHandling = require('./databaseInterface.js');
 
 function init() 
 {

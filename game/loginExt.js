@@ -4,13 +4,13 @@ var crypto = require('crypto');
 var config = require('../config.json');
 
 /* 
-LOGIN HANDLERS:
+loginExt HANDLERS:
     cc => handleCheckCookie
     pl => handlePlayerLogin
 */
 
 /*
-LOGIN SERVER RESPONSES:
+loginExt RESPONSES:
     slFail => saved login failure to authenticate
     lFail => login failure to authenticate user
     sCookie => save login cookie 
@@ -34,7 +34,7 @@ function handleLoginRequest(player, requestType, args)
             handlePlayerLogin(player, args);
             break;
         default:
-            logger.log("Invalid handler (request type): " + requestType, 'w');
+            logger.log("Invalid loginExt handler: " + requestType, 'w');
             break;
     }
 }

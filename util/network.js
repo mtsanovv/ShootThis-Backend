@@ -1,8 +1,9 @@
 var logger = require('./logger.js');
-var db = require('./handling/dbHandling.js');
+var db = require('./databaseInterface.js');
 var Player = require('../game/player.js');
-var login = require('../game/login.js');
-var world = require('../game/world.js');
+var login = require('../game/loginExt.js');
+var world = require('../game/gameExt.js');
+var match = require('../game/matchExt.js');
 
 function init(io)
 {
@@ -37,6 +38,7 @@ function userConnected(socket)
         {
             world.handleConnection(player);
             socket.on('gameExt', (requestType, args) => { world.handleWorldPacket(player, requestType, args); });
+            socket.on('matchExt', (requestType, args) => { match.handleMatchPacket(player, requestType, args); });
         }
     }
     else

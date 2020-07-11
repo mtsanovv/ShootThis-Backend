@@ -1,5 +1,5 @@
 var fs = require('fs');
-var logger = require('../logger.js');
+var logger = require('./logger.js');
 
 function init(closeSockets, io) 
 {	
