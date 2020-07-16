@@ -11,7 +11,7 @@ class Player
         this.socket = socket;
         this.IP = socket.request.connection.remoteAddress;
         this.database;
-        this.playerData;
+        this.playerData = {};
     }
 
     init()

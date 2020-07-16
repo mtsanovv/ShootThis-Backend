@@ -5,6 +5,7 @@ var bcrypt = require('bcryptjs');
 gameExt HANDLERS:
     p => ping
     joinServer => handleJoinServer
+    userInfo => handleUserInfoRequest
 */
 
 //match packets are in the match ext
@@ -14,6 +15,7 @@ gameExt SERVER RESPONSES:
     p => pong
     joinOk => user has joined successfully the server
     joinFail => user cannot be authenticated, disconnect after that
+    userInfo => respond with playerData if user has authenticated
 */
 
 
@@ -31,6 +33,9 @@ function handleWorldPacket(player, requestType, args)
             break;
         case "joinServer":
             handleJoinServer(player, args);
+            break;
+        case "userInfo":
+            handleUserInfoRequest(player);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -74,6 +79,11 @@ function handleJoinServer(player, args)
             player.socket.disconnect();
         }
     });
+}
+
+function handleUserInfoRequest(player)
+{
+    player.socket.emit("gameExt", "userInfo", [player.nickname, player.playerData]);
 }
 
 function handleDisconnection(socket)

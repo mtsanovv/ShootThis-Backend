@@ -7,6 +7,7 @@ global.serverId;
 global.serverDetails;
 global.origins = [];
 global.players = [];
+global.matches = {};
 
 if(params.length != 3)
   return console.log("Improper parameters specified. Please start the server like this: 'node init.js serverKey' ");
