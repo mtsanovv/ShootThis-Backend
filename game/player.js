@@ -19,13 +19,16 @@ class Player
         this.database = db.getDb();
     }
 
-    loadPlayer(username)
+    joinServerOk(username)
     {
         this.database.getColumnsByUsername(username, ['id', 'username', 'nickname', 'playerData'], (err, result) => {
             this.id = result['id'];
             this.username = result['username'];
             this.nickname = result['nickname'];
             this.playerData = JSON.parse(result['playerData']); 
+            this.socket.emit("gameExt", "joinOk");
+            this.database.joinedWorldByUsername(username, this.IP, (err) => {});
+            this.database.updateColumnByUsername(username, "ip", this.IP, (err) => {});
         });
        
     }

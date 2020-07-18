@@ -58,12 +58,7 @@ function handleJoinServer(player, args)
                     else
                     {
                         if(res === true)
-                        {
-                            player.socket.emit("gameExt", "joinOk");
-                            player.database.joinedWorldByUsername(args[0], player.IP, (err) => {});
-                            player.database.updateColumnByUsername(args[0], "ip", player.IP, (err) => {});
-                            player.loadPlayer(args[0]);
-                        }
+                            player.joinServerOk(args[0]);
                         else
                         {
                             player.socket.emit("gameExt", "joinFail");
