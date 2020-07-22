@@ -15,7 +15,7 @@ function init()
         
         io.adapter(redis({ host: config["redis"].host, port: config["redis"].port }));
         
-        logger.log("Starting ShootThis-Backend for " + global.serverId + " on port " + global.serverDetails.port);
+        logger.log("Starting ShootThis-Backend for " + global.serverId + " on " + global.serverDetails.address + ":" + global.serverDetails.port);
 
         for (var i = 0; i < os.cpus().length; i++)
             cluster.fork();

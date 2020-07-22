@@ -3,6 +3,10 @@
         "//localhost": {
             "ports": ["80", "4424"],
             "protocol": "http:"
+        },
+        "//192.168.191.1": {
+            "ports": ["80", "4424"],
+            "protocol": "http:"
         }
     },
     "redis": {
@@ -27,11 +31,31 @@
             "dbConnections": 50,
             "type": "login"
         },
+        "login2": {
+            "address": "192.168.191.1",
+            "port": 9904,
+            "displayName": "Login Server",
+            "protocol": "http:",
+            "maxUsers": 1000,
+            "dbConnections": 50,
+            "type": "login"
+        },
         "game1": {
             "address": "127.0.0.1",
             "publicAddress": "//localhost",
-            "port": 9904,
+            "port": 9905,
             "displayName": "Sofia, BG",
+            "protocol": "http:",
+            "maxUsers": 450,
+            "maxPlayersPerMatch": 30,
+            "dbConnections": 70,
+            "type": "game"
+        },
+        "game2": {
+            "address": "192.168.191.1",
+            "publicAddress": "//192.168.191.1",
+            "port": 9906,
+            "displayName": "Botevgrad, BG",
             "protocol": "http:",
             "maxUsers": 450,
             "maxPlayersPerMatch": 30,
