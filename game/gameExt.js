@@ -1,11 +1,14 @@
 var logger = require('../util/logger.js');
 var bcrypt = require('bcryptjs');
+var config = require('../config.json');
 
 /* 
 gameExt HANDLERS:
     p => ping
     joinServer => handleJoinServer
     userInfo => handleUserInfoRequest
+    getCharacters => handleGetCharacters
+    changeCharacter => handleChangeCharacter
 */
 
 //match packets are in the match ext
@@ -16,6 +19,8 @@ gameExt SERVER RESPONSES:
     joinOk => user has joined successfully the server
     joinFail => user cannot be authenticated, disconnect after that
     userInfo => respond with playerData if user has authenticated
+    charactersData => respond with the characters object from config
+    changeCharacter => respond with the changed character if successful
 */
 
 
@@ -36,6 +41,12 @@ function handleWorldPacket(player, requestType, args)
             break;
         case "userInfo":
             handleUserInfoRequest(player);
+            break;
+        case "getCharacters":
+            handleGetCharacters(player);
+            break;
+        case "changeCharacter":
+            handleChangeCharacter(player, args);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -79,6 +90,20 @@ function handleJoinServer(player, args)
 function handleUserInfoRequest(player)
 {
     player.socket.emit("gameExt", "userInfo", [player.nickname, player.playerData]);
+}
+
+function handleGetCharacters(player)
+{
+    player.socket.emit("gameExt", "charactersData", [config.characters]);
+}
+
+function handleChangeCharacter(player, args)
+{
+    if(args[0] in config.characters && String(player.playerData.character) != args[0])
+        player.updateInData("character", config.characters[args[0]].id, (error) => {
+            if(!error)
+                player.socket.emit("gameExt", "changeCharacter", [args[0]]);
+        });
 }
 
 function handleDisconnection(socket)

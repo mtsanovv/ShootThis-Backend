@@ -62,5 +62,17 @@
             "dbConnections": 70,
             "type": "game"
         }
+    },
+    "characters": {
+        "0": {
+            "id": 0,
+            "name": "CHARACTER0",
+            "title": "DESERT WARRIOR"
+        },
+        "1": {
+            "id": 1,
+            "name": "CHARACTER1",
+            "title": "INTERDESERT SKIRMISHER"
+        }
     }
 }

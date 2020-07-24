@@ -98,6 +98,18 @@ class Database
         });
     }
 
+    updateColumnById(id, column, value, callback) 
+    {
+        var query = "UPDATE `users` SET " + column + " = ? WHERE `id` = ?";
+
+        this.executeQuery(query, [value, id], function(error, results, fields) {
+            if(error)
+                return callback(true);
+            else
+                return callback(false);
+        });
+    }
+
     getColumnByUsername(username, column, callback) 
     {
         var query = "SELECT username, " + column + " FROM `users` WHERE `username` LIKE ?";

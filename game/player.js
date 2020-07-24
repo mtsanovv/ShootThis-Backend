@@ -12,6 +12,7 @@ class Player
         this.IP = socket.request.connection.remoteAddress;
         this.database;
         this.playerData = {};
+        this.joinedOk = false;
     }
 
     init()
@@ -27,10 +28,25 @@ class Player
             this.nickname = result['nickname'];
             this.playerData = JSON.parse(result['playerData']); 
             this.socket.emit("gameExt", "joinOk");
+            this.joinedOk = true;
             this.database.joinedWorldByUsername(username, this.IP, (err) => {});
             this.database.updateColumnByUsername(username, "ip", this.IP, (err) => {});
         });
        
+    }
+
+    updateInData(key, value, callback)
+    {
+        if(this.joinedOk)
+        {
+            var oldValue = this.playerData[key];
+            this.playerData[key] = value;
+            this.database.updateColumnById(this.id, 'playerData', JSON.stringify(this.playerData), (error) => {
+                if(error)
+                    this.playerData[key] = oldValue;
+                return callback(error);
+            });
+        }
     }
 }
 
