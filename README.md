@@ -18,6 +18,7 @@ This is the backend server, written in Node.js. The database used in the creatio
 	- "redis" is the configuration for the redis-server
 	- "database" are the database details for the main database
 	- "servers" are the servers that can be started. The available types of servers are "login" and "game". An example has already been done. **Please note that if you run the different servers on different datacenters, all of them should have the same config.json.**
+	- "characters" is the configuration for all the characters, available in-game
 6. Run redis-server.
 7. To start one of the servers on the current machine, use ```node init.js serverKey```. For example, ```node init.js login1```.
 8. To start more than one server, simply open another Terminal and perform step 7 again for the other server.
