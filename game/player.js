@@ -13,6 +13,7 @@ class Player
         this.database;
         this.playerData = {};
         this.joinedOk = false;
+        this.matchId;
     }
 
     init()

@@ -8,12 +8,12 @@ var match = require('../game/matchExt.js');
 function init(io)
 {
     io.on('connection', socket => {
-        userConnected(socket);
-        socket.on('disconnect', () => { userDisconnected(socket); });
+        userConnected(io, socket);
+        socket.on('disconnect', () => { userDisconnected(io, socket); });
     });
 }
 
-function userConnected(socket)
+function userConnected(io, socket)
 {
     for(var player in global.players)
         if(global.players[player].IP == socket.request.connection.remoteAddress)
@@ -37,8 +37,8 @@ function userConnected(socket)
         else if(global.serverDetails.type == "game")
         {
             world.handleConnection(player);
-            socket.on('gameExt', (requestType, args) => { world.handleWorldPacket(player, requestType, args); });
-            socket.on('matchExt', (requestType, args) => { match.handleMatchPacket(player, requestType, args); });
+            socket.on('gameExt', (requestType, args) => { world.handleWorldPacket(io, player, requestType, args); });
+            socket.on('matchExt', (requestType, args) => { match.handleMatchPacket(io, player, requestType, args); });
         }
     }
     else
@@ -48,11 +48,11 @@ function userConnected(socket)
     }
 }
 
-function userDisconnected(socket)
+function userDisconnected(io, socket)
 {
     if(global.serverDetails.type == "login")
         login.handleDisconnection(socket);
     else if(global.serverDetails.type == "game")
-        world.handleDisconnection(socket);
+        world.handleDisconnection(io, socket);
 }
 module.exports.init = init;

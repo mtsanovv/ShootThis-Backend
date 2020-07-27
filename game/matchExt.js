@@ -8,7 +8,7 @@ matchExt HANDLERS:
 matchExt RESPONSES:
 */
 
-function handleMatchPacket(player, requestType, args)
+function handleMatchPacket(io, player, requestType, args)
 {
     switch(requestType)
     {

@@ -9,6 +9,8 @@ gameExt HANDLERS:
     userInfo => handleUserInfoRequest
     getCharacters => handleGetCharacters
     changeCharacter => handleChangeCharacter
+    joinMatch => handleJoinMatch
+    cancelJoin => handleCancelJoinMatch
 */
 
 //match packets are in the match ext
@@ -21,8 +23,8 @@ gameExt SERVER RESPONSES:
     userInfo => respond with playerData if user has authenticated
     charactersData => respond with the characters object from config
     changeCharacter => respond with the changed character if successful
+    joinMatch => respond with data about the match (how many players in match, min players, max players, is the player the host)
 */
-
 
 function handleConnection(player)
 {
@@ -47,6 +49,12 @@ function handleWorldPacket(player, requestType, args)
             break;
         case "changeCharacter":
             handleChangeCharacter(player, args);
+            break;
+        case "joinMatch":
+            handleJoinMatch(io, player);
+            break;
+        case "cancelJoin":
+            handleCancelJoinMatch(io, player);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -106,7 +114,49 @@ function handleChangeCharacter(player, args)
         });
 }
 
-function handleDisconnection(socket)
+function handleJoinMatch(io, player)
+{
+    for(var match in global.matches)
+    {
+        if(global.matches[match].players.length + 1 <= global.serverDetails.maxPlayersPerMatch)
+        {
+            global.matches[match].players.push(player.socket);
+            player.socket.join(match);
+            if(global.matches[match].players.length == global.serverDetails.maxPlayersPerMatch)
+            {
+                //broadcast to all players to start match
+                return;
+            }
+            else
+            {
+                player.socket.emit("gameExt", "joinMatch", [global.matches[match].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, false]);
+                //broadcast to all other players in match queue the new player count
+                return;
+            }
+        }
+    }
+
+    var matchId = new Date().valueOf();
+    while(global.matches.hasOwnProperty(matchId))
+        matchId++;
+    var match = {players: [], started: false, id: matchId, host: player.socket};
+    global.matches[matchId] = match;
+    player.socket.emit("gameExt", "joinMatch", [global.matches[matchId].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, true]);
+    //the last element in the array of arguments is whether the player is host, in this case, they are
+
+}
+
+function handleCancelJoinMatch(io, player)
+{
+
+}
+
+function leaveMatch(player)
+{
+
+}
+
+function handleDisconnection(io, socket)
 {
     for(var player in global.players)
     {

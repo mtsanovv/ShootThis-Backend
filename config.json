@@ -48,6 +48,7 @@
             "protocol": "http:",
             "maxUsers": 450,
             "maxPlayersPerMatch": 30,
+            "minPlayersPerMatch": 5,
             "dbConnections": 70,
             "type": "game"
         },
@@ -59,6 +60,7 @@
             "protocol": "http:",
             "maxUsers": 450,
             "maxPlayersPerMatch": 30,
+            "minPlayersPerMatch": 5,
             "dbConnections": 70,
             "type": "game"
         }
