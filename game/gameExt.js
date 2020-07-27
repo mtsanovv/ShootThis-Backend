@@ -11,6 +11,7 @@ gameExt HANDLERS:
     changeCharacter => handleChangeCharacter
     joinMatch => handleJoinMatch
     cancelJoin => handleCancelJoinMatch
+    requestMinPlayersForMatch => handleRequestMinPlayersForMatch
 */
 
 //match packets are in the match ext
@@ -24,6 +25,8 @@ gameExt SERVER RESPONSES:
     charactersData => respond with the characters object from config
     changeCharacter => respond with the changed character if successful
     joinMatch => respond with data about the match (how many players in match, min players, max players, is the player the host)
+    updateMatch => respond with data about the match (how many players in match, max players)
+    minPlayersForMatch => respond with the minimum amount of players, required to start a match
 */
 
 function handleConnection(player)
@@ -31,7 +34,7 @@ function handleConnection(player)
     player.socket.emit("gameExt", "connectionSuccessful", [global.serverDetails.displayName]);
 }
 
-function handleWorldPacket(player, requestType, args)
+function handleWorldPacket(io, player, requestType, args)
 {
     switch(requestType)
     {
@@ -55,6 +58,9 @@ function handleWorldPacket(player, requestType, args)
             break;
         case "cancelJoin":
             handleCancelJoinMatch(io, player);
+            break;
+        case "requestMinPlayersForMatch":
+            handleRequestMinPlayersForMatch(player);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -156,13 +162,18 @@ function leaveMatch(player)
 
 }
 
+function handleRequestMinPlayersForMatch(player)
+{
+    player.socket.emit("gameExt", "minPlayersForMatch", [global.serverDetails.minPlayersPerMatch]);
+}
+
 function handleDisconnection(io, socket)
 {
     for(var player in global.players)
     {
         if(global.players[player].socket == socket)
         {
-            //disconnect from matches if inside a match etc
+            leaveMatch(player);
             global.players.splice(player, 1);
         }
     }
