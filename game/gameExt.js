@@ -1,23 +1,24 @@
 var logger = require('../util/logger.js');
 var bcrypt = require('bcryptjs');
 var config = require('../config.json');
+var match = require('./matchExt.js');
 
 /* 
-gameExt HANDLERS:
+gameExt (lobby) HANDLERS:
     p => ping
     joinServer => handleJoinServer
     userInfo => handleUserInfoRequest
     getCharacters => handleGetCharacters
     changeCharacter => handleChangeCharacter
     joinMatch => handleJoinMatch
-    cancelJoin => handleCancelJoinMatch
+    cancelJoin => leaveMatch
     requestMinPlayersForMatch => handleRequestMinPlayersForMatch
+    voteChangeHost => handleVoteChangeHost
+    startMatch => handleStartMatch
 */
 
-//match packets are in the match ext
-
 /*
-gameExt SERVER RESPONSES:
+gameExt (lobby) SERVER RESPONSES:
     p => pong
     joinOk => user has joined successfully the server
     joinFail => user cannot be authenticated, disconnect after that
@@ -26,8 +27,9 @@ gameExt SERVER RESPONSES:
     changeCharacter => respond with the changed character if successful
     joinMatch => respond with data about the match (how many players in match, min players, max players, is the player the host)
     updateMatch => respond with data about the match (how many players in match, max players)
-    minPlayersForMatch => respond with the minimum amount of players, required to start a match
-*/
+    minPlayersForMatch => respond with the minimum amount of players, required to start a match, voting quorum numerator and denominator
+    changeHost => respond with current count of players and whether the recipient is host or not
+ */
 
 function handleConnection(player)
 {
@@ -57,10 +59,16 @@ function handleWorldPacket(io, player, requestType, args)
             handleJoinMatch(io, player);
             break;
         case "cancelJoin":
-            handleCancelJoinMatch(io, player);
+            leaveMatch(io, player);
             break;
         case "requestMinPlayersForMatch":
             handleRequestMinPlayersForMatch(player);
+            break;
+        case "voteChangeHost":
+            handleVoteChangeHost(player);
+            break;
+        case "startMatch":
+            handleStartMatch(io, player);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -127,16 +135,17 @@ function handleJoinMatch(io, player)
         if(global.matches[match].players.length + 1 <= global.serverDetails.maxPlayersPerMatch)
         {
             global.matches[match].players.push(player.socket);
-            player.socket.join(match);
+            player.socket.join(String(match));
+            player.matchId = match;
             if(global.matches[match].players.length == global.serverDetails.maxPlayersPerMatch)
             {
-                //broadcast to all players to start match
+                handleStartMatch(io);
                 return;
             }
             else
             {
                 player.socket.emit("gameExt", "joinMatch", [global.matches[match].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, false]);
-                //broadcast to all other players in match queue the new player count
+                player.socket.to(String(match)).emit("gameExt", "updateMatch", [global.matches[match].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch]);
                 return;
             }
         }
@@ -145,36 +154,112 @@ function handleJoinMatch(io, player)
     var matchId = new Date().valueOf();
     while(global.matches.hasOwnProperty(matchId))
         matchId++;
-    var match = {players: [], started: false, id: matchId, host: player.socket};
+    var match = {players: [player.socket], started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
     global.matches[matchId] = match;
+    player.socket.join(String(matchId));
+    player.matchId = matchId;
     player.socket.emit("gameExt", "joinMatch", [global.matches[matchId].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, true]);
     //the last element in the array of arguments is whether the player is host, in this case, they are
 
 }
 
-function handleCancelJoinMatch(io, player)
+function leaveMatch(io, player)
 {
-
+    var matchId = player.matchId;
+    if(matchId)
+    {
+        player.socket.leave(String(matchId), () => {
+            for(var socket in global.matches[matchId].players)
+            {
+                if(global.matches[matchId].players[socket] === player.socket)
+                {
+                    if(global.matches[matchId].started)
+                    {
+                        //match has started, it has to do something else
+                        //handling perhaps by matchExt
+                        //stuff here has to be sent by io because the socket is gone
+                    }
+                    else
+                    {
+                        global.matches[matchId].players.splice(socket, 1);
+                        if(!global.matches[matchId].players.length)
+                            delete global.matches[matchId];
+                        else
+                        {
+                            var hasPlayerVotedAgainstHost = global.matches[matchId].voters.indexOf(player.socket.id);
+                            if(hasPlayerVotedAgainstHost != -1)
+                                global.matches[matchId].voters.splice(hasPlayerVotedAgainstHost, 1);
+                            player.socket.to(String(matchId)).emit("gameExt", "updateMatch", [global.matches[matchId].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch]);
+                            if(global.matches[matchId].host === player.socket || global.matches[matchId].voters.length >= Math.floor(global.serverDetails.votingQuorumNumerator / global.serverDetails.votingQuorumDenominator * global.matches[matchId].players.length))
+                            {
+                                global.matches[matchId].voters.length = 0;
+                                global.matches[matchId].host = global.matches[matchId].players[0];
+                                global.matches[matchId].host.to(String(matchId)).emit("gameExt", "changeHost", [global.matches[matchId].players.length, false]);
+                                //others are not hosts
+                                global.matches[matchId].host.emit("gameExt", "changeHost", [global.matches[matchId].players.length, true]);
+                                //the player is host
+                            }
+                        }
+                    }
+                    player.matchId = 0;
+                    break;
+                }
+            }
+        });
+    }
 }
 
-function leaveMatch(player)
+function handleVoteChangeHost(player)
 {
+    if(global.matches[player.matchId].players.indexOf(player.socket) !== -1)
+    {
+        var hasPlayerVotedAgainstHost = global.matches[player.matchId].voters.indexOf(player.socket.id);
+        if(hasPlayerVotedAgainstHost === -1)
+        {
+            global.matches[player.matchId].voters.push(player.socket.id);
+            if(global.matches[player.matchId].voters.length >= Math.floor(global.serverDetails.votingQuorumNumerator / global.serverDetails.votingQuorumDenominator * global.matches[player.matchId].players.length))
+            {
+                var newHostIndex = global.matches[player.matchId].players.indexOf(global.matches[player.matchId].host) + 1;
+                console.log(newHostIndex);
+                if(newHostIndex >= global.matches[player.matchId].players.length)
+                    newHostIndex = 0;
+                console.log(newHostIndex);
+                global.matches[player.matchId].voters.length = 0;
+                global.matches[player.matchId].host = global.matches[player.matchId].players[newHostIndex];
+                global.matches[player.matchId].host.to(String(player.matchId)).emit("gameExt", "changeHost", [global.matches[player.matchId].players.length, false]);
+                //others are not hosts
+                global.matches[player.matchId].host.emit("gameExt", "changeHost", [global.matches[player.matchId].players.length, true]);
+                //the player is host
+            }
+        }
+    }
+}
 
+function handleStartMatch(io, player = null)
+{
+    if(player !== null)
+    {
+        //check if player is host and if there are enough players
+        //then prepare to start match
+        return;
+    }
+    //start match (thats when it happens naturally)
 }
 
 function handleRequestMinPlayersForMatch(player)
 {
-    player.socket.emit("gameExt", "minPlayersForMatch", [global.serverDetails.minPlayersPerMatch]);
+    player.socket.emit("gameExt", "minPlayersForMatch", [global.serverDetails.minPlayersPerMatch, global.serverDetails.votingQuorumNumerator, global.serverDetails.votingQuorumDenominator]);
 }
 
 function handleDisconnection(io, socket)
 {
     for(var player in global.players)
     {
-        if(global.players[player].socket == socket)
+        if(global.players[player].socket === socket)
         {
-            leaveMatch(player);
+            leaveMatch(io, global.players[player]);
             global.players.splice(player, 1);
+            break;
         }
     }
     logger.log("User disconnected");
