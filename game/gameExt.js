@@ -220,10 +220,8 @@ function handleVoteChangeHost(player)
             if(global.matches[player.matchId].voters.length >= Math.floor(global.serverDetails.votingQuorumNumerator / global.serverDetails.votingQuorumDenominator * global.matches[player.matchId].players.length))
             {
                 var newHostIndex = global.matches[player.matchId].players.indexOf(global.matches[player.matchId].host) + 1;
-                console.log(newHostIndex);
                 if(newHostIndex >= global.matches[player.matchId].players.length)
                     newHostIndex = 0;
-                console.log(newHostIndex);
                 global.matches[player.matchId].voters.length = 0;
                 global.matches[player.matchId].host = global.matches[player.matchId].players[newHostIndex];
                 global.matches[player.matchId].host.to(String(player.matchId)).emit("gameExt", "changeHost", [global.matches[player.matchId].players.length, false]);
