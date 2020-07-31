@@ -1,4 +1,7 @@
 {
+    "errorCodes": {
+        "ERROR_CRITICAL": 121314
+    },
     "origins": {
         "//localhost": {
             "ports": ["80", "4424"],
@@ -47,12 +50,7 @@
             "displayName": "Sofia, BG",
             "protocol": "http:",
             "maxUsers": 450,
-            "maxPlayersPerMatch": 30,
-            "minPlayersPerMatch": 1,
-            "votingQuorumNumerator": 2,
-            "votingQuorumDenominator": 3,
-            "maxMatchTime": 1200000,
-            "dbConnections": 70,
+            "dbConnections": 20,
             "type": "game"
         },
         "game2": {
@@ -62,14 +60,16 @@
             "displayName": "Botevgrad, BG",
             "protocol": "http:",
             "maxUsers": 450,
-            "maxPlayersPerMatch": 30,
-            "minPlayersPerMatch": 1,
-            "votingQuorumNumerator": 2,
-            "votingQuorumDenominator": 3,
-            "maxMatchTime": 1200000,
-            "dbConnections": 70,
+            "dbConnections": 20,
             "type": "game"
         }
+    },
+    "gameConfig": {
+        "maxPlayersPerMatch": 30,
+        "minPlayersPerMatch": 1,
+        "votingQuorumNumerator": 2,
+        "votingQuorumDenominator": 3,
+        "maxMatchTime": 1200000
     },
     "characters": {
         "0": {

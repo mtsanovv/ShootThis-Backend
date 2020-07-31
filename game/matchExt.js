@@ -1,4 +1,5 @@
 var logger = require('../util/logger.js');
+var config = require('../config.json');
 
 /* 
 matchExt HANDLERS:

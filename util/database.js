@@ -13,6 +13,7 @@ class Database
         this.database;
         this.testSQL;
         this.connection;
+        this.connectionSuccessful = false;
     }
 
     init() 
@@ -47,13 +48,14 @@ class Database
 		delete this.database;
     }
     
-    executeQuery(query, args, callback)
+    executeQuery(query, args, callback, overrideFatal = false)
     {
         this.connection.getConnection(function (err, conn) {
             if(err)
             {
-                if(c !== undefined) c.release();
-                errorHandler.logFatal(e);
+                if(typeof c !== 'undefined') c.release();
+                if(!overrideFatal) errorHandler.logFatal(err);
+                if(typeof callback == 'function') callback(err, null, null);
             }
             else
             {
@@ -73,9 +75,9 @@ class Database
     testConnection() 
     {
         this.executeQuery(this.testSQL, [], function(error, results, fields) {
-            if(error !== null)
+            if(error !== null && typeof error !== 'undefined')
                 errorHandler.criticalError(error);
-        });
+        }, true);
     }
 
     /*

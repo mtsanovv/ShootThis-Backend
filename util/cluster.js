@@ -22,6 +22,12 @@ function init()
         
         cluster.on('exit', function(worker, code, signal) {
             logger.log('Worker ' + worker.process.pid + ' died');
+            if(code === config.errorCodes.ERROR_CRITICAL)
+            {
+                //121314 is the critical error code
+                errorHandling.criticalError({message: "Worker " + worker.process.pid + " has died with code " + code + ", which means that there's a critical error in the code. The app is being terminated for safety measures. Please refer to the logs."});
+                process.exit(code);
+            }
         }); 
 
         errorHandling.init(false, io);

@@ -132,20 +132,20 @@ function handleJoinMatch(io, player)
 {
     for(var match in global.matches)
     {
-        if(global.matches[match].players.length + 1 <= global.serverDetails.maxPlayersPerMatch)
+        if(global.matches[match].players.length + 1 <= config.gameConfig.maxPlayersPerMatch)
         {
             global.matches[match].players.push(player.socket);
             player.socket.join(String(match));
             player.matchId = match;
-            if(global.matches[match].players.length == global.serverDetails.maxPlayersPerMatch)
+            if(global.matches[match].players.length == config.gameConfig.maxPlayersPerMatch)
             {
                 handleStartMatch(io);
                 return;
             }
             else
             {
-                player.socket.emit("gameExt", "joinMatch", [global.matches[match].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, false]);
-                player.socket.to(String(match)).emit("gameExt", "updateMatch", [global.matches[match].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch]);
+                player.socket.emit("gameExt", "joinMatch", [global.matches[match].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch, false]);
+                player.socket.to(String(match)).emit("gameExt", "updateMatch", [global.matches[match].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch]);
                 return;
             }
         }
@@ -158,7 +158,7 @@ function handleJoinMatch(io, player)
     global.matches[matchId] = match;
     player.socket.join(String(matchId));
     player.matchId = matchId;
-    player.socket.emit("gameExt", "joinMatch", [global.matches[matchId].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch, true]);
+    player.socket.emit("gameExt", "joinMatch", [global.matches[matchId].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch, true]);
     //the last element in the array of arguments is whether the player is host, in this case, they are
 
 }
@@ -189,8 +189,8 @@ function leaveMatch(io, player)
                             var hasPlayerVotedAgainstHost = global.matches[matchId].voters.indexOf(player.socket.id);
                             if(hasPlayerVotedAgainstHost != -1)
                                 global.matches[matchId].voters.splice(hasPlayerVotedAgainstHost, 1);
-                            player.socket.to(String(matchId)).emit("gameExt", "updateMatch", [global.matches[matchId].players.length, global.serverDetails.minPlayersPerMatch, global.serverDetails.maxPlayersPerMatch]);
-                            if(global.matches[matchId].host === player.socket || global.matches[matchId].voters.length >= Math.floor(global.serverDetails.votingQuorumNumerator / global.serverDetails.votingQuorumDenominator * global.matches[matchId].players.length))
+                            player.socket.to(String(matchId)).emit("gameExt", "updateMatch", [global.matches[matchId].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch]);
+                            if(global.matches[matchId].host === player.socket || global.matches[matchId].voters.length >= Math.floor(config.gameConfig.votingQuorumNumerator / config.gameConfig.votingQuorumDenominator * global.matches[matchId].players.length))
                             {
                                 global.matches[matchId].voters.length = 0;
                                 global.matches[matchId].host = global.matches[matchId].players[0];
@@ -217,7 +217,7 @@ function handleVoteChangeHost(player)
         if(hasPlayerVotedAgainstHost === -1)
         {
             global.matches[player.matchId].voters.push(player.socket.id);
-            if(global.matches[player.matchId].voters.length >= Math.floor(global.serverDetails.votingQuorumNumerator / global.serverDetails.votingQuorumDenominator * global.matches[player.matchId].players.length))
+            if(global.matches[player.matchId].voters.length >= Math.floor(config.gameConfig.votingQuorumNumerator / config.gameConfig.votingQuorumDenominator * global.matches[player.matchId].players.length))
             {
                 var newHostIndex = global.matches[player.matchId].players.indexOf(global.matches[player.matchId].host) + 1;
                 if(newHostIndex >= global.matches[player.matchId].players.length)
@@ -246,7 +246,7 @@ function handleStartMatch(io, player = null)
 
 function handleRequestMinPlayersForMatch(player)
 {
-    player.socket.emit("gameExt", "minPlayersForMatch", [global.serverDetails.minPlayersPerMatch, global.serverDetails.votingQuorumNumerator, global.serverDetails.votingQuorumDenominator]);
+    player.socket.emit("gameExt", "minPlayersForMatch", [config.gameConfig.minPlayersPerMatch, config.gameConfig.votingQuorumNumerator, config.gameConfig.votingQuorumDenominator]);
 }
 
 function handleDisconnection(io, socket)

@@ -1,5 +1,6 @@
 var fs = require('fs');
 var logger = require('./logger.js');
+var config = require('../config.json');
 
 function init(closeSockets, io) 
 {	
@@ -49,7 +50,7 @@ function criticalError(error)
     {
         if(error.message) 
         {	
-			var final_message = error;
+			var final_message = error.message;
 			
 			if(error.stack)
                 final_message = error.stack;
@@ -61,7 +62,7 @@ function criticalError(error)
 					logger.log(error_str, 'c');
             });
             
-			process.exit(1);
+			process.exit(config.errorCodes.ERROR_CRITICAL);
 			
 			//critical errors such as failure to establish a database connection require the server to be shutdown
 		}
