@@ -29,6 +29,8 @@ gameExt (lobby) SERVER RESPONSES:
     updateMatch => respond with data about the match (how many players in match, max players)
     minPlayersForMatch => respond with the minimum amount of players, required to start a match, voting quorum numerator and denominator
     changeHost => respond with current count of players and whether the recipient is host or not
+    startMatch => respond with the time that the user will wait before the match is started
+
  */
 
 function handleConnection(player)
@@ -68,7 +70,7 @@ function handleWorldPacket(io, player, requestType, args)
             handleVoteChangeHost(player);
             break;
         case "startMatch":
-            handleStartMatch(io, player);
+            handleStartMatch(io, 0, player);
             break;
         default:
             logger.log("Invalid gameExt handler: " + requestType, 'w');
@@ -139,7 +141,7 @@ function handleJoinMatch(io, player)
             player.matchId = match;
             if(global.matches[match].players.length == config.gameConfig.maxPlayersPerMatch)
             {
-                handleStartMatch(io);
+                handleStartMatch(io, match);
                 return;
             }
             else
@@ -154,7 +156,7 @@ function handleJoinMatch(io, player)
     var matchId = new Date().valueOf();
     while(global.matches.hasOwnProperty(matchId))
         matchId++;
-    var match = {players: [player.socket], started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
+    var match = {players: [player.socket], connected: [], started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
     global.matches[matchId] = match;
     player.socket.join(String(matchId));
     player.matchId = matchId;
@@ -175,9 +177,12 @@ function leaveMatch(io, player)
                 {
                     if(global.matches[matchId].started)
                     {
-                        //match has started, it has to do something else
-                        //handling perhaps by matchExt
-                        //stuff here has to be sent by io because the socket is gone
+                        var isUserConnected = global.matches[matchId].connected.indexOf(player.socket);
+                        if(isUserConnected !== -1)
+                            global.matches[matchId].connected.splice(isUserConnected, 1);
+                        global.matches[matchId].players.splice(socket, 1);
+                        match.playerLeft(io, player);
+                        player.socket.emit("gameExt", "joinOk");
                     }
                     else
                     {
@@ -233,15 +238,19 @@ function handleVoteChangeHost(player)
     }
 }
 
-function handleStartMatch(io, player = null)
+function handleStartMatch(io, matchId, player = null)
 {
     if(player !== null)
     {
-        //check if player is host and if there are enough players
-        //then prepare to start match
+        if(player.matchId && global.matches[player.matchId].host == player.socket && global.matches[player.matchId].players.length >= config.gameConfig.minPlayersPerMatch)
+        {
+            io.to(String(player.matchId)).emit("gameExt", "startMatch", [config.gameConfig.timeToWaitBeforeMatch]);
+            match.startMatch(io, player.matchId);
+        }
         return;
     }
-    //start match (thats when it happens naturally)
+    io.to(String(matchId)).emit("gameExt", "startMatch", [config.gameConfig.timeToWaitBeforeMatch]);
+    match.startMatch(io, matchId);
 }
 
 function handleRequestMinPlayersForMatch(player)

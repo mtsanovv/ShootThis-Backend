@@ -23,11 +23,11 @@ class Player
 
     joinServerOk(username)
     {
-        this.database.getColumnsByUsername(username, ['id', 'username', 'nickname', 'playerData'], (err, result) => {
+        this.database.getColumnsByUsername(username, ['id', 'username', 'nickname', 'playerData'], async (err, result) => {
             this.id = result['id'];
             this.username = result['username'];
             this.nickname = result['nickname'];
-            this.playerData = JSON.parse(result['playerData']); 
+            this.playerData = await JSON.parse(result['playerData']); 
             this.socket.emit("gameExt", "joinOk");
             this.joinedOk = true;
             this.database.joinedWorldByUsername(username, this.IP, (err) => {});
@@ -36,13 +36,14 @@ class Player
        
     }
 
-    updateInData(key, value, callback)
+    async updateInData(key, value, callback)
     {
         if(this.joinedOk)
         {
             var oldValue = this.playerData[key];
             this.playerData[key] = value;
-            this.database.updateColumnById(this.id, 'playerData', JSON.stringify(this.playerData), (error) => {
+            var stringified = await JSON.stringify(this.playerData);
+            this.database.updateColumnById(this.id, 'playerData', stringified, (error) => {
                 if(error)
                     this.playerData[key] = oldValue;
                 return callback(error);

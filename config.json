@@ -69,7 +69,8 @@
         "minPlayersPerMatch": 1,
         "votingQuorumNumerator": 2,
         "votingQuorumDenominator": 3,
-        "maxMatchTime": 1200000
+        "maxMatchTime": 1200000,
+        "timeToWaitBeforeMatch": 10000
     },
     "characters": {
         "0": {
