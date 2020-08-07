@@ -1,5 +1,6 @@
 var logger = require('../util/logger.js');
 var db = require('../util/databaseInterface.js');
+var config = require('../config.json');
 
 class Player
 {
@@ -28,6 +29,8 @@ class Player
             this.username = result['username'];
             this.nickname = result['nickname'];
             this.playerData = await JSON.parse(result['playerData']); 
+            this.playerData.xpToLevel = config.gameConfig.xpToLevel;
+            //xp to level is meant to be constant even if there's a different value in the database
             this.socket.emit("gameExt", "joinOk");
             this.joinedOk = true;
             this.database.joinedWorldByUsername(username, this.IP);
