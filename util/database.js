@@ -100,7 +100,7 @@ class Database
         });
     }
 
-    updateColumnById(id, column, value, callback) 
+    updateColumnById(id, column, value, callback = (error) => {}) 
     {
         var query = "UPDATE `users` SET " + column + " = ? WHERE `id` = ?";
 
@@ -136,7 +136,7 @@ class Database
         });
     }
 
-    updateColumnByUsername(username, column, value, callback) 
+    updateColumnByUsername(username, column, value, callback = (error) => {}) 
     {
         var query = "UPDATE `users` SET " + column + " = ? WHERE `username` LIKE ?";
 
@@ -148,7 +148,7 @@ class Database
         });
     }
 
-    joinedWorldByUsername(username, ip, callback) 
+    joinedWorldByUsername(username, ip, callback = (error) => {}) 
     {
         var query = "INSERT INTO `loginhistory` (`id`, `username`, `time`, `world`, `ip`) VALUES (NULL, ? , current_timestamp(), ? , ?); ";
 

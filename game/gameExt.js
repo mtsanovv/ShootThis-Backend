@@ -179,7 +179,7 @@ function leaveMatch(io, player)
                             global.matches[matchId].connected.splice(isUserConnected, 1);
                         global.matches[matchId].players.splice(socket, 1);
                         match.playerLeft(io, player);
-                        player.socket.emit("gameExt", "joinOk");
+                        if(player.joinedOk) player.socket.emit("gameExt", "joinOk");
                     }
                     else
                     {

@@ -30,19 +30,19 @@ class Player
             this.playerData = await JSON.parse(result['playerData']); 
             this.socket.emit("gameExt", "joinOk");
             this.joinedOk = true;
-            this.database.joinedWorldByUsername(username, this.IP, (err) => {});
-            this.database.updateColumnByUsername(username, "ip", this.IP, (err) => {});
+            this.database.joinedWorldByUsername(username, this.IP);
+            this.database.updateColumnByUsername(username, "ip", this.IP);
         });
        
     }
 
-    async updateInData(key, value, callback)
+    updateInData(key, value, callback = (error) => {})
     {
         if(this.joinedOk)
         {
             var oldValue = this.playerData[key];
             this.playerData[key] = value;
-            var stringified = await JSON.stringify(this.playerData);
+            var stringified = JSON.stringify(this.playerData);
             this.database.updateColumnById(this.id, 'playerData', stringified, (error) => {
                 if(error)
                     this.playerData[key] = oldValue;

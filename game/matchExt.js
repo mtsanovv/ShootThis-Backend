@@ -68,6 +68,7 @@ function playerLeft(io, player)
         delete global.matches[player.matchId];
         return;
     }
+
     if(global.matches[player.matchId].connected.length)
     {
         logger.log("sending playerleft");
