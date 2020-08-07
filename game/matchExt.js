@@ -63,9 +63,9 @@ function handleJoinMatchOk(player)
 
 function playerLeft(io, player)
 {
-    if(!global.matches[matchId].connected.length && !global.matches[matchId].players.length && global.matches[matchId].connectionsCheckPassed)
+    if(!global.matches[player.matchId].connected.length && !global.matches[player.matchId].players.length && global.matches[player.matchId].connectionsCheckPassed)
     { 
-        delete global.matches[matchId];
+        delete global.matches[player.matchId];
         return;
     }
     if(global.matches[player.matchId].connected.length)
