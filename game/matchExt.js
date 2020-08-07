@@ -40,6 +40,8 @@ async function startMatch(io, matchId)
             socket.emit("matchExt", "leaveMatch");
     }
 
+    global.matches[matchId].connectionsCheckPassed = true;
+
     if(global.matches[matchId].connected.length < config.gameConfig.minPlayersPerMatch)
     {
         logger.log("insufficient people");
@@ -61,6 +63,11 @@ function handleJoinMatchOk(player)
 
 function playerLeft(io, player)
 {
+    if(!global.matches[matchId].connected.length && !global.matches[matchId].players.length && global.matches[matchId].connectionsCheckPassed)
+    { 
+        delete global.matches[matchId];
+        return;
+    }
     if(global.matches[player.matchId].connected.length)
     {
         logger.log("sending playerleft");

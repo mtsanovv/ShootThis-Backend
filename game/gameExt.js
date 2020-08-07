@@ -134,29 +134,26 @@ function handleJoinMatch(io, player)
 {
     for(var match in global.matches)
     {
-        if(global.matches[match].players.length + 1 <= config.gameConfig.maxPlayersPerMatch)
+        if(global.matches[match].players.length + 1 <= config.gameConfig.maxPlayersPerMatch && !global.matches[match].started)
         {
             global.matches[match].players.push(player.socket);
             player.socket.join(String(match));
             player.matchId = match;
             if(global.matches[match].players.length == config.gameConfig.maxPlayersPerMatch)
-            {
                 handleStartMatch(io, match);
-                return;
-            }
             else
             {
                 player.socket.emit("gameExt", "joinMatch", [global.matches[match].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch, false]);
                 player.socket.to(String(match)).emit("gameExt", "updateMatch", [global.matches[match].players.length, config.gameConfig.minPlayersPerMatch, config.gameConfig.maxPlayersPerMatch]);
-                return;
             }
+            return;
         }
     }
 
     var matchId = new Date().valueOf();
     while(global.matches.hasOwnProperty(matchId))
         matchId++;
-    var match = {players: [player.socket], connected: [], started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
+    var match = {players: [player.socket], connected: [], connectionsCheckPassed: false, started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
     global.matches[matchId] = match;
     player.socket.join(String(matchId));
     player.matchId = matchId;
