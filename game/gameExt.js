@@ -153,7 +153,7 @@ function handleJoinMatch(io, player)
     var matchId = new Date().valueOf();
     while(global.matches.hasOwnProperty(matchId))
         matchId++;
-    var match = {players: [player.socket], connected: [], connectionsCheckPassed: false, started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
+    var match = {players: [player.socket], connected: [], failed: false, connectionsCheckPassed: false, started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
     global.matches[matchId] = match;
     player.socket.join(String(matchId));
     player.matchId = matchId;
@@ -179,10 +179,13 @@ function leaveMatch(io, player)
                             global.matches[matchId].connected.splice(isUserConnected, 1);
                         global.matches[matchId].players.splice(socket, 1);
                         match.playerLeft(io, player);
-                        if(player.joinedOk) player.socket.emit("gameExt", "joinOk");
+                        if(player.joinedOk) 
+                            player.socket.emit("gameExt", "joinOk");
                     }
                     else
                     {
+                        if(global.matches[matchId].failed && player.joinedOk)
+                            player.socket.emit("gameExt", "joinOk");
                         global.matches[matchId].players.splice(socket, 1);
                         if(!global.matches[matchId].players.length)
                             delete global.matches[matchId];

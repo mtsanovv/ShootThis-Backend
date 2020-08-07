@@ -44,10 +44,10 @@ async function startMatch(io, matchId)
 
     if(global.matches[matchId].connected.length < config.gameConfig.minPlayersPerMatch)
     {
-        logger.log("insufficient people");
         for(var socket in global.matches[matchId].connected)
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
         global.matches[matchId].started = false;
+        global.matches[matchId].failed = true;
         if(!global.matches[matchId].connected.length && !global.matches[matchId].players.length)
             delete global.matches[matchId];
         return;
@@ -56,7 +56,6 @@ async function startMatch(io, matchId)
 
 function handleJoinMatchOk(player)
 {
-    logger.log("joined match");
     if(global.matches[player.matchId].players.indexOf(player.socket) !== -1 && global.matches[player.matchId].connected.indexOf(player.socket) === -1)
         global.matches[player.matchId].connected.push(player.socket);
 }
@@ -71,7 +70,6 @@ function playerLeft(io, player)
 
     if(global.matches[player.matchId].connected.length)
     {
-        logger.log("sending playerleft");
         io.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
         //checks for how many people left etc
         //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED
