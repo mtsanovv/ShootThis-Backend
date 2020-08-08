@@ -12,6 +12,7 @@ matchExt RESPONSES:
     leaveMatch => the user is forced to leave to lobby
     matchFail => everybody has left the match
     playerLeft => respond with the player id that left
+    startMatch => match starts with the parameters given
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -52,6 +53,9 @@ async function startMatch(io, matchId)
             delete global.matches[matchId];
         return;
     }
+
+    //fill playersObject, obstaclesObject, spawnablesObject
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.gameHeight, config.gameConfig.gameWidth, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
 }
 
 function handleJoinMatchOk(player)

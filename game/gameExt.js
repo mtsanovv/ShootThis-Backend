@@ -153,7 +153,7 @@ function handleJoinMatch(io, player)
     var matchId = new Date().valueOf();
     while(global.matches.hasOwnProperty(matchId))
         matchId++;
-    var match = {players: [player.socket], connected: [], failed: false, connectionsCheckPassed: false, started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
+    var match = {players: [player.socket], playersObject: {}, obstaclesObject: {}, spawnablesObject: {}, connected: [], failed: false, connectionsCheckPassed: false, started: false, id: matchId, host: player.socket, voters: [], connectedToMatch: []};
     global.matches[matchId] = match;
     player.socket.join(String(matchId));
     player.matchId = matchId;
