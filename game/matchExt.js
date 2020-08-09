@@ -13,6 +13,7 @@ matchExt RESPONSES:
     matchFail => everybody has left the match
     playerLeft => respond with the player id that left
     startMatch => match starts with the parameters given
+    focusedPlayer => id of focused player
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -54,8 +55,35 @@ async function startMatch(io, matchId)
         return;
     }
 
-    //fill playersObject, obstaclesObject, spawnablesObject
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.gameWidth, config.gameConfig.gameHeight, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
+    //fill obstaclesObject, spawnablesObject
+
+    for(var socket in global.matches[matchId].connected)
+    {
+        var playerSocket = global.matches[matchId].connected[socket];
+        var player = await getPlayerBySocket(playerSocket);
+        if(player)
+        {
+            //when generating coordinates, check if they overlap with anything else before
+            var x = integerInInterval(0, config.gameConfig.gameWidth);
+            var y = integerInInterval(0, config.gameConfig.gameHeight);
+            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, width: config.characters[player.playerData.character].matchWidth, height: config.characters[player.playerData.character].matchHeight};
+            player.socket.emit("matchExt", "focusedPlayer", [player.id]);
+        }
+        else
+            global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
+    }
+    
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
+}
+
+async function getPlayerBySocket(socket)
+{
+    for(var player in global.players)
+    {
+        if(global.players[player].socket === socket)
+            return global.players[player];
+    }
+    return null;
 }
 
 function handleJoinMatchOk(player)
@@ -78,6 +106,11 @@ function playerLeft(io, player)
         //checks for how many people left etc
         //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED
     }
+}
+
+function integerInInterval(min, max) 
+{  
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;

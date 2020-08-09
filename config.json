@@ -72,19 +72,36 @@
         "maxMatchTime": 1200000,
         "timeToWaitBeforeMatch": 1000,
         "xpToLevel": 15000,
-        "gameHeight": 7680,
-        "gameWidth": 7680
+        "gameHeight": 7424,
+        "gameWidth": 7424,
+        "cameraBoundX": 8960,
+        "cameraBoundY": 8960
+    },
+    "obstacles": {
+        "0": {
+
+        }
+    },
+    "spawnables":
+    {
+        "0": {
+
+        }
     },
     "characters": {
         "0": {
             "id": 0,
             "name": "CHARACTER0",
-            "title": "DESERT WARRIOR"
+            "title": "DESERT WARRIOR",
+            "matchWidth": 116,
+            "matchHeight": 71
         },
         "1": {
             "id": 1,
             "name": "CHARACTER1",
-            "title": "INTERDESERT SKIRMISHER"
+            "title": "INTERDESERT SKIRMISHER",
+            "matchWidth": 116,
+            "matchHeight": 71
         }
     }
 }
