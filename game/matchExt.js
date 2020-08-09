@@ -55,7 +55,7 @@ async function startMatch(io, matchId)
     }
 
     //fill playersObject, obstaclesObject, spawnablesObject
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.gameHeight, config.gameConfig.gameWidth, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.gameWidth, config.gameConfig.gameHeight, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
 }
 
 function handleJoinMatchOk(player)

@@ -70,7 +70,7 @@
         "votingQuorumNumerator": 2,
         "votingQuorumDenominator": 3,
         "maxMatchTime": 1200000,
-        "timeToWaitBeforeMatch": 10000,
+        "timeToWaitBeforeMatch": 1000,
         "xpToLevel": 15000,
         "gameHeight": 7680,
         "gameWidth": 7680
