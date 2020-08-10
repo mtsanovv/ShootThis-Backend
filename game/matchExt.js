@@ -73,7 +73,7 @@ async function startMatch(io, matchId)
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
     }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject, config.gameConfig.gameWidth, config.gameConfig.gameHeight]);
 }
 
 async function getPlayerBySocket(socket)
