@@ -4,6 +4,8 @@ var config = require('../config.json');
 /* 
 matchExt HANDLERS:
     matchOk => handleJoinMatchOk
+    rotatePlayer => handleRotatePlayer
+    movePlayer => handleMovePlayer
 */
 
 /*
@@ -14,6 +16,8 @@ matchExt RESPONSES:
     playerLeft => respond with the player id that left
     startMatch => match starts with the parameters given
     focusedPlayer => id of focused player
+    playerRotated => respond with the rotation parameter for the given player
+    playerMoved => respond with the new x, y and rotation for the given player
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -24,6 +28,12 @@ function handleMatchPacket(io, player, requestType, args)
     {
         case "matchOk":
             handleJoinMatchOk(player);
+            break;
+        case "rotatePlayer":
+            handleRotatePlayer(player, args);
+            break;
+        case "movePlayer":
+            handleMovePlayer(io, player, args);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -63,7 +73,7 @@ async function startMatch(io, matchId)
         var player = await getPlayerBySocket(playerSocket);
         if(player)
         {
-            //when generating coordinates, check if they overlap with anything else before
+            //when generating coordinates, check if they overlap with anything else before in a do/while
             var x = integerInInterval(0, config.gameConfig.gameWidth);
             var y = integerInInterval(0, config.gameConfig.gameHeight);
             global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, width: config.characters[player.playerData.character].matchWidth, height: config.characters[player.playerData.character].matchHeight};
@@ -104,13 +114,59 @@ function playerLeft(io, player)
     {
         io.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
         //checks for how many people left etc
-        //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED
+        //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED FROM THE ROOM, BUT THE OTHERS HAVE TO REMOVE HIM TOO
+    }
+}
+
+function handleRotatePlayer(player, args)
+{
+    if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        global.matches[player.matchId].playersObject[player.id].rotation = args[0];
+        player.socket.to(String(player.matchId)).emit("matchExt", "playerRotated", [player.id, args[0]]);
+    }
+}
+
+function handleMovePlayer(io, player, args)
+{
+    if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        var xCalculations = Math.round(config.gameConfig.playerSpeed * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation));
+        var yCalculations = Math.round(config.gameConfig.playerSpeed * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation));
+        var newX = -1;
+        var newY = -1;
+        switch(args[0])
+        {
+            case "minus":
+                newX = global.matches[player.matchId].playersObject[player.id].x - xCalculations;
+                newY = global.matches[player.matchId].playersObject[player.id].y - yCalculations;
+                break;
+            case "plus":
+                newX = global.matches[player.matchId].playersObject[player.id].x + xCalculations;
+                newY = global.matches[player.matchId].playersObject[player.id].y + yCalculations;
+                break;
+        }
+        if(validCoordinates(newX, newY))
+        {
+            global.matches[player.matchId].playersObject[player.id].x = newX;
+            global.matches[player.matchId].playersObject[player.id].y = newY;
+            io.to(String(player.matchId)).emit("matchExt", "playerMoved", [player.id, newX, newY, global.matches[player.matchId].playersObject[player.id].rotation]);
+        }
     }
 }
 
 function integerInInterval(min, max) 
 {  
     return Math.floor(Math.random() * (max - min) + min);
+}
+
+function validCoordinates(x, y)
+{
+    //checks also for overlapping other objects etc
+    //for now it's only checking for world boundaries
+    if(x < 0 || x > config.gameConfig.gameWidth || y < 0 || y > config.gameConfig.gameHeight)
+        return false;
+    return true;
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;
