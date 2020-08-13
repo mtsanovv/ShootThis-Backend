@@ -76,7 +76,7 @@ async function startMatch(io, matchId)
             //when generating coordinates, check if they overlap with anything else before in a do/while
             var x = integerInInterval(0, config.gameConfig.gameWidth);
             var y = integerInInterval(0, config.gameConfig.gameHeight);
-            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, width: config.characters[player.playerData.character].matchWidth, height: config.characters[player.playerData.character].matchHeight};
+            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
         }
         else
