@@ -76,8 +76,7 @@
         "gameWidth": 7424,
         "cameraBoundX": 8960,
         "cameraBoundY": 8960,
-        "playerSpeed": 20,
-        "minTimeBetweenMovement": 300
+        "playerSpeed": 20
     },
     "obstacles": {
         "0": {
