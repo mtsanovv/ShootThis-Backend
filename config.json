@@ -93,12 +93,16 @@
         "0": {
             "id": 0,
             "name": "CHARACTER0",
-            "title": "DESERT WARRIOR"
+            "title": "DESERT WARRIOR",
+            "matchWidth": 116,
+            "matchHeight": 71
         },
         "1": {
             "id": 1,
             "name": "CHARACTER1",
-            "title": "INTERDESERT SKIRMISHER"
+            "title": "INTERDESERT SKIRMISHER",
+            "matchWidth": 116,
+            "matchHeight": 71
         }
     }
 }

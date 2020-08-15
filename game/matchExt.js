@@ -146,7 +146,7 @@ function handleMovePlayer(io, player, args)
                 newY = global.matches[player.matchId].playersObject[player.id].y + yCalculations;
                 break;
         }
-        if(validCoordinates(newX, newY))
+        if(validCoordinates(player, newX, newY))
         {
             global.matches[player.matchId].playersObject[player.id].x = newX;
             global.matches[player.matchId].playersObject[player.id].y = newY;
@@ -160,10 +160,21 @@ function integerInInterval(min, max)
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-function validCoordinates(x, y)
+function validCoordinates(player, x, y)
 {
     //checks also for overlapping other objects etc
     //for now it's only checking for world boundaries
+    var radius = config.characters[String(player.playerData.character)].matchWidth;
+    if(config.characters[String(player.playerData.character)] > radius)
+        radius = config.characters[String(player.playerData.character)].matchHeight;
+    
+    for(var playerId in global.matches[player.matchId].playersObject)
+    {
+        var isIntersecting = Math.pow(x - global.matches[player.matchId].playersObject[playerId].x, 2) + Math.pow(y - global.matches[player.matchId].playersObject[playerId].y, 2) <= (radius / 2) ^ 2;
+        if(isIntersecting)
+            return false;
+    }
+
     if(x < 0 || x > config.gameConfig.gameWidth || y < 0 || y > config.gameConfig.gameHeight)
         return false;
     return true;
