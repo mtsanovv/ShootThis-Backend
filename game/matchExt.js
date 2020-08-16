@@ -130,11 +130,9 @@ function handleRotatePlayer(player, args)
 function handleMovePlayer(io, player, args)
 {
     var now = new Date().valueOf();
-    var fps = 1000 / args[1];
-    if(args[1] > 60)
-        fps = 1000 / 60;
-    if((now - player.lastActions.lastMoved) > fps && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    if((now - player.lastActions.lastMoved) > config.gameConfig.timeBetweenMovement && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
+        player.lastActions.lastMoved = now;
         var xCalculations = Math.round(config.gameConfig.playerSpeed * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation));
         var yCalculations = Math.round(config.gameConfig.playerSpeed * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation));
         var newX = -1;
