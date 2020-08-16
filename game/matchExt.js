@@ -129,7 +129,11 @@ function handleRotatePlayer(player, args)
 
 function handleMovePlayer(io, player, args)
 {
-    if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    var now = new Date().valueOf();
+    var fps = 1000 / args[1];
+    if(args[1] > 60)
+        fps = 1000 / 60;
+    if((now - player.lastActions.lastMoved) > fps && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
         var xCalculations = Math.round(config.gameConfig.playerSpeed * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation));
         var yCalculations = Math.round(config.gameConfig.playerSpeed * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation));
@@ -164,15 +168,23 @@ function validCoordinates(player, x, y)
 {
     //checks also for overlapping other objects etc
     //for now it's only checking for world boundaries
-    var radius = config.characters[String(player.playerData.character)].matchWidth;
-    if(config.characters[String(player.playerData.character)] > radius)
-        radius = config.characters[String(player.playerData.character)].matchHeight;
+
+    var playerRadius = config.characters[String(player.playerData.character)].matchWidth;
+    if(config.characters[String(player.playerData.character)] > playerRadius)
+        playerRadius = config.characters[String(player.playerData.character)].matchHeight;
     
     for(var playerId in global.matches[player.matchId].playersObject)
     {
-        var isIntersecting = Math.pow(x - global.matches[player.matchId].playersObject[playerId].x, 2) + Math.pow(y - global.matches[player.matchId].playersObject[playerId].y, 2) <= (radius / 2) ^ 2;
-        if(isIntersecting)
-            return false;
+        var enemyRadius = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchWidth;
+        if(config.characters[String(global.matches[player.matchId].playersObject[playerId].character)] > enemyRadius)
+            enemyRadius = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchHeight;
+
+        if(playerId != player.id)
+        {
+            var isIntersecting = (Math.pow(x - global.matches[player.matchId].playersObject[playerId].x, 2) + Math.pow(y - global.matches[player.matchId].playersObject[playerId].y, 2)) <= Math.pow(playerRadius / 2 + enemyRadius / 2, 2);
+            if(isIntersecting)
+                return false;
+        }
     }
 
     if(x < 0 || x > config.gameConfig.gameWidth || y < 0 || y > config.gameConfig.gameHeight)

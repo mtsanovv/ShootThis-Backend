@@ -15,6 +15,7 @@ class Player
         this.playerData = {};
         this.joinedOk = false;
         this.matchId = 0;
+        this.lastActions = {lastMoved: 0};
     }
 
     init()
