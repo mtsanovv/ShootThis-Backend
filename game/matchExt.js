@@ -1,5 +1,6 @@
 var logger = require('../util/logger.js');
 var config = require('../config.json');
+var intersects = require('intersects');
 
 /* 
 matchExt HANDLERS:
@@ -65,7 +66,7 @@ async function startMatch(io, matchId)
         return;
     }
 
-    //fill obstaclesObject, spawnablesObject
+    //fill obstaclesArray, spawnablesArray
 
     for(var socket in global.matches[matchId].connected)
     {
@@ -83,7 +84,7 @@ async function startMatch(io, matchId)
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
     }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesObject, global.matches[matchId].spawnablesObject, config.gameConfig.gameWidth, config.gameConfig.gameHeight]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight]);
 }
 
 async function getPlayerBySocket(socket)
@@ -179,7 +180,19 @@ function validCoordinates(player, x, y)
 
         if(playerId != player.id)
         {
-            var isIntersecting = (Math.pow(x - global.matches[player.matchId].playersObject[playerId].x, 2) + Math.pow(y - global.matches[player.matchId].playersObject[playerId].y, 2)) <= Math.pow(playerRadius / 2 + enemyRadius / 2, 2);
+            var isIntersecting = intersects.circleCircle(x, y, playerRadius / 2, global.matches[player.matchId].playersObject[playerId].x, global.matches[player.matchId].playersObject[playerId].y, enemyRadius / 2);
+            if(isIntersecting)
+                return false;
+        }
+    }
+
+    for(var obstacleKey in global.matches[player.matchId].obstaclesArray)
+    {
+        var obstacle = global.matches[player.matchId].obstaclesArray[obstacleKey];
+        var hitbox = scaleHitboxToReal(obstacle.x, obstacle.y, config.obstacles[String(obstacle.type)].matchWidth, config.obstacles[String(obstacle.type)].matchHeight, config.obstacles[String(obstacle.type)].hitbox);
+        for(var polygon in hitbox)
+        {
+            var isIntersecting = intersects.circlePolygon(x, y, playerRadius / 2, hitbox[polygon]);
             if(isIntersecting)
                 return false;
         }
@@ -188,6 +201,24 @@ function validCoordinates(player, x, y)
     if(x < 0 || x > config.gameConfig.gameWidth || y < 0 || y > config.gameConfig.gameHeight)
         return false;
     return true;
+}
+
+function scaleHitboxToReal(x, y, width, height, hitbox)
+{
+    var newHitbox = [];
+    for(var polygon in hitbox)
+    {
+        newHitbox[polygon] = [];
+        for(var polygonCoordinates = 0; polygonCoordinates < hitbox[polygon].length; polygonCoordinates++)
+        {
+            if(polygonCoordinates % 2 === 0)
+                newHitbox[polygon][polygonCoordinates] = hitbox[polygon][polygonCoordinates] * width + x;
+            else
+                newHitbox[polygon][polygonCoordinates] = hitbox[polygon][polygonCoordinates] * height + y;
+        }
+    }
+
+    return newHitbox;
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;
