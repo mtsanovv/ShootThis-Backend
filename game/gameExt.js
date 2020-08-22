@@ -206,7 +206,7 @@ function leaveMatch(io, player)
                             }
                         }
                     }
-                    player.matchId = 0;
+                    player.resetMatchData();
                     break;
                 }
             }

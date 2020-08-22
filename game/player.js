@@ -1,6 +1,7 @@
 var logger = require('../util/logger.js');
 var db = require('../util/databaseInterface.js');
 var config = require('../config.json');
+var lodash = require('lodash');
 
 class Player
 {
@@ -15,12 +16,20 @@ class Player
         this.playerData = {};
         this.joinedOk = false;
         this.matchId = 0;
-        this.lastActions = {lastMoved: 0};
+        this.matchDataDefault = { lastActions: {lastMoved: 0}, health: 100, heals: 0, weapon: {ammo: 0, loadedAmmo: 20, hopup: 0, mag: 1} }
+        this.matchData = {};
+        this.resetMatchData();
     }
 
     init()
     {
         this.database = db.getDb();
+    }
+
+    resetMatchData()
+    {
+        this.matchId = 0;
+        this.matchData = lodash.cloneDeep(this.matchDataDefault);
     }
 
     joinServerOk(username)

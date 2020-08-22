@@ -1,6 +1,7 @@
 var logger = require('../util/logger.js');
 var config = require('../config.json');
 var intersects = require('intersects');
+var lodash = require('lodash');
 
 /* 
 matchExt HANDLERS:
@@ -99,15 +100,14 @@ async function startMatch(io, matchId)
         var player = await getPlayerBySocket(playerSocket);
         if(player)
         {
-            //when generating coordinates, check if they overlap with anything else before in a do/while
             var width = config.obstacles[String(player.playerData.character)].matchWidth;
             var height = config.obstacles[String(player.playerData.character)].matchHeight;
             var x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
             var y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
-            //maybe should've used let for x, y, width and height as well as j, but that would create some other problems that have to be fixed
+            
             for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
             {
-                //despite the fact that x and y are centers of a circle,  we can still calculate the initial x and y of the original player box before they are spawned to ensure that there are no collisions
+                //despite the fact that x and y are the center of a circle,  we can still calculate the initial x and y of the original player box before they are spawned to ensure that there are no collisions
                 var isIntersecting = intersects.boxBox(x - width / 2, y - height / 2, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
                 if(isIntersecting)
                 {
@@ -171,9 +171,9 @@ function handleRotatePlayer(player, args)
 function handleMovePlayer(io, player, args)
 {
     var now = new Date().valueOf();
-    if((now - player.lastActions.lastMoved) > config.gameConfig.timeBetweenMovement && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    if((now - player.matchData.lastActions.lastMoved) > config.gameConfig.timeBetweenMovement && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
-        player.lastActions.lastMoved = now;
+        player.matchData.lastActions.lastMoved = now;
         var xCalculations = Math.round(config.gameConfig.playerSpeed * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation));
         var yCalculations = Math.round(config.gameConfig.playerSpeed * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation));
         var newX = -1;
