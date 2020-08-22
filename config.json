@@ -77,7 +77,9 @@
         "cameraBoundX": 8960,
         "cameraBoundY": 8960,
         "playerSpeed": 20,
-        "timeBetweenMovement": 17
+        "timeBetweenMovement": 17,
+        "minObstacles": 100,
+        "maxObstacles": 300
     },
     "obstacles": {
         "0": {

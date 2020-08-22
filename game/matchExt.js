@@ -66,7 +66,32 @@ async function startMatch(io, matchId)
         return;
     }
 
-    //fill obstaclesArray, spawnablesArray
+    var obstaclesToSpawn = integerInInterval(config.gameConfig.minObstacles, config.gameConfig.maxObstacles);
+    var rectanglesToCheckAgainst = [];
+
+    for(var i = 0; i < obstaclesToSpawn; i++)
+    {
+        var obstacleType = integerInInterval(0, Object.keys(config.obstacles).length); //generates a number in the interval [min, max) so it's fine to use the length
+        var width = config.obstacles[String(obstacleType)].matchWidth;
+        var height = config.obstacles[String(obstacleType)].matchHeight;
+        var x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
+        var y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+
+        for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
+        {
+            var isIntersecting = intersects.boxBox(x, y, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
+            if(isIntersecting)
+            {
+                x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
+                y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+                j = -1;
+            }
+        }
+        rectanglesToCheckAgainst.push([x, y, width, height]);
+        global.matches[matchId].obstaclesArray.push({type: obstacleType, x: x, y: y});
+    }
+
+    //fill spawnables array
 
     for(var socket in global.matches[matchId].connected)
     {
@@ -75,8 +100,23 @@ async function startMatch(io, matchId)
         if(player)
         {
             //when generating coordinates, check if they overlap with anything else before in a do/while
-            var x = integerInInterval(0, config.gameConfig.gameWidth);
-            var y = integerInInterval(0, config.gameConfig.gameHeight);
+            var width = config.obstacles[String(player.playerData.character)].matchWidth;
+            var height = config.obstacles[String(player.playerData.character)].matchHeight;
+            var x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
+            var y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+            //maybe should've used let for x, y, width and height as well as j, but that would create some other problems that have to be fixed
+            for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
+            {
+                //despite the fact that x and y are centers of a circle,  we can still calculate the initial x and y of the original player box before they are spawned to ensure that there are no collisions
+                var isIntersecting = intersects.boxBox(x - width / 2, y - height / 2, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
+                if(isIntersecting)
+                {
+                    x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
+                    y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+                    j = -1;
+                }
+            }
+            rectanglesToCheckAgainst.push([x - width / 2, y - height / 2, width, height]);
             global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
         }
@@ -114,7 +154,7 @@ function playerLeft(io, player)
     if(global.matches[player.matchId].connected.length)
     {
         io.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
-        //checks for how many people left etc
+        //checks for how many people left, if player in playersObject etc
         //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED FROM THE ROOM, BUT THE OTHERS HAVE TO REMOVE HIM TOO
     }
 }
@@ -159,7 +199,8 @@ function handleMovePlayer(io, player, args)
 }
 
 function integerInInterval(min, max) 
-{  
+{
+    //it generates a number in the interval [min, max)  
     return Math.floor(Math.random() * (max - min) + min);
 }
 
