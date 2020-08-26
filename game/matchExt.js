@@ -67,6 +67,7 @@ async function startMatch(io, matchId)
         return;
     }
 
+    //spawn obstacles
     var obstaclesToSpawn = integerInInterval(config.gameConfig.minObstacles, config.gameConfig.maxObstacles);
     var rectanglesToCheckAgainst = [];
 
@@ -75,16 +76,16 @@ async function startMatch(io, matchId)
         var obstacleType = integerInInterval(0, Object.keys(config.obstacles).length); //generates a number in the interval [min, max) so it's fine to use the length
         var width = config.obstacles[String(obstacleType)].matchWidth;
         var height = config.obstacles[String(obstacleType)].matchHeight;
-        var x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
-        var y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+        var x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+        var y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
 
         for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
         {
             var isIntersecting = intersects.boxBox(x, y, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
             if(isIntersecting)
             {
-                x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
-                y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+                x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+                y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
                 j = -1;
             }
         }
@@ -92,18 +93,19 @@ async function startMatch(io, matchId)
         global.matches[matchId].obstaclesArray.push({type: obstacleType, x: x, y: y});
     }
 
-    //fill spawnables array
+    //spawn spawnables
 
+    //spawn players
     for(var socket in global.matches[matchId].connected)
     {
         var playerSocket = global.matches[matchId].connected[socket];
         var player = await getPlayerBySocket(playerSocket);
         if(player)
         {
-            var width = config.obstacles[String(player.playerData.character)].matchWidth;
-            var height = config.obstacles[String(player.playerData.character)].matchHeight;
-            var x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
-            var y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+            var width = config.characters[String(player.playerData.character)].matchWidth;
+            var height = config.characters[String(player.playerData.character)].matchHeight;
+            var x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+            var y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
             
             for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
             {
@@ -111,20 +113,20 @@ async function startMatch(io, matchId)
                 var isIntersecting = intersects.boxBox(x - width / 2, y - height / 2, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
                 if(isIntersecting)
                 {
-                    x = integerInInterval(0 + width, config.gameConfig.gameWidth - width);
-                    y = integerInInterval(0 + height, config.gameConfig.gameHeight - height);
+                    x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+                    y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
                     j = -1;
                 }
             }
             rectanglesToCheckAgainst.push([x - width / 2, y - height / 2, width, height]);
-            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0};
+            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
         }
         else
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
     }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height]);
 }
 
 async function getPlayerBySocket(socket)
@@ -206,40 +208,50 @@ function integerInInterval(min, max)
 
 function validCoordinates(player, x, y)
 {
-    //checks also for overlapping other objects etc
-    //for now it's only checking for world boundaries
+    var playerDiameter = config.characters[String(player.playerData.character)].hitboxDiameter;
 
-    var playerRadius = config.characters[String(player.playerData.character)].matchWidth;
-    if(config.characters[String(player.playerData.character)] > playerRadius)
-        playerRadius = config.characters[String(player.playerData.character)].matchHeight;
+    var playerSpriteDiameter = config.characters[String(player.playerData.character)].matchWidth;
+    if(config.characters[String(player.playerData.character)] > playerSpriteDiameter)
+        playerSpriteDiameter = config.characters[String(player.playerData.character)].matchHeight;
     
+    //check against other players
     for(var playerId in global.matches[player.matchId].playersObject)
     {
-        var enemyRadius = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchWidth;
-        if(config.characters[String(global.matches[player.matchId].playersObject[playerId].character)] > enemyRadius)
-            enemyRadius = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchHeight;
+        var enemySpriteDiameter = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchWidth;
+        if(config.characters[String(global.matches[player.matchId].playersObject[playerId].character)] > enemySpriteDiameter)
+            enemySpriteDiameter = config.characters[String(global.matches[player.matchId].playersObject[playerId].character)].matchHeight;
 
         if(playerId != player.id)
         {
-            var isIntersecting = intersects.circleCircle(x, y, playerRadius / 2, global.matches[player.matchId].playersObject[playerId].x, global.matches[player.matchId].playersObject[playerId].y, enemyRadius / 2);
+            var isIntersecting = intersects.circleCircle(x, y, playerSpriteDiameter / 2, global.matches[player.matchId].playersObject[playerId].x, global.matches[player.matchId].playersObject[playerId].y, enemySpriteDiameter / 2);
             if(isIntersecting)
                 return false;
         }
     }
 
+    //check against obstacles
     for(var obstacleKey in global.matches[player.matchId].obstaclesArray)
     {
         var obstacle = global.matches[player.matchId].obstaclesArray[obstacleKey];
         var hitbox = scaleHitboxToReal(obstacle.x, obstacle.y, config.obstacles[String(obstacle.type)].matchWidth, config.obstacles[String(obstacle.type)].matchHeight, config.obstacles[String(obstacle.type)].hitbox);
         for(var polygon in hitbox)
         {
-            var isIntersecting = intersects.circlePolygon(x, y, playerRadius / 2, hitbox[polygon]);
+            var isIntersecting = intersects.circlePolygon(x, y, playerDiameter / 2, hitbox[polygon]);
             if(isIntersecting)
                 return false;
         }
     }
 
-    if(x < 0 || x > config.gameConfig.gameWidth || y < 0 || y > config.gameConfig.gameHeight)
+    //check against world walls
+    //          2
+    // walls - 1 3
+    //          4
+    var walls = [];
+    walls.push(intersects.circleBox(x, y, playerDiameter / 2, 0, 0, config.wallTiles.vertical.width, config.gameConfig.gameHeight)); //wall 1
+    walls.push(intersects.circleBox(x, y, playerDiameter / 2, config.wallTiles.vertical.width, 0, config.gameConfig.gameWidth - config.wallTiles.vertical.width, config.wallTiles.horizontal.height)); //wall 2
+    walls.push(intersects.circleBox(x, y, playerDiameter / 2, config.gameConfig.gameWidth - config.wallTiles.vertical.width, 0, config.wallTiles.vertical.width, config.gameConfig.gameHeight)); //wall 3
+    walls.push(intersects.circleBox(x, y, playerDiameter / 2, config.wallTiles.vertical.width, config.gameConfig.gameHeight - config.wallTiles.horizontal.height, config.gameConfig.gameWidth - config.wallTiles.vertical.width, config.wallTiles.horizontal.height)); //wall 4
+    if(walls.indexOf(true) !== -1)
         return false;
     return true;
 }

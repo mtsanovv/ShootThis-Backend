@@ -81,6 +81,16 @@
         "minObstacles": 100,
         "maxObstacles": 300
     },
+    "wallTiles": {
+        "horizontal": {
+            "width": 55,
+            "height": 35
+        },
+        "vertical": {
+            "width": 35,
+            "height": 55
+        }
+    },
     "obstacles": {
         "0": {
             "description": "Weirdly shaped desert rock",
@@ -107,14 +117,20 @@
             "name": "CHARACTER0",
             "title": "DESERT WARRIOR",
             "matchWidth": 116,
-            "matchHeight": 71
+            "matchHeight": 95,
+            "hitboxDiameter": 93,
+            "centerX": 0.4,
+            "centerY": 0.5
         },
         "1": {
             "id": 1,
             "name": "CHARACTER1",
             "title": "INTERDESERT SKIRMISHER",
             "matchWidth": 116,
-            "matchHeight": 71
+            "matchHeight": 95,
+            "hitboxDiameter": 93,
+            "centerX": 0.4,
+            "centerY": 0.5
         }
     }
 }
