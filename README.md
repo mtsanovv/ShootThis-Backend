@@ -25,6 +25,7 @@ This is the backend server, written in Node.js. The database used in the creatio
 	- "wallTiles" are the configurations for the horizontal and vertical tiles of the game borders (which are walls as assets)
 	- "obstacles" are the configurations for the different obstacles that are spawned around the map
 	- "spawnables" are the configurations for the different items that spawn around the map
+	- "weapons" are the configurations for weapons (currently only 1)
 	- "characters" is the configuration for all the characters, available in-game
 6. Run redis-server.
 7. To start one of the servers on the current machine, use ```node init.js serverKey```. For example, ```node init.js login1```.

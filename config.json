@@ -111,6 +111,48 @@
 
         }
     },
+    "weapons": {
+        "0": {
+            "name": "Rifle",
+            "description": "Single-fire rifle",
+            "maxAmmo": 100,
+            "hopups": {
+                "0": {
+                    "name": "No hopups",
+                    "damagePerShot": 12,
+                    "timeBetweenFire": 200
+                },
+                "1": {
+                    "name": "Piercer",
+                    "damagePerShot": 15,
+                    "timeBetweenFire": 200
+                },
+                "2": {
+                    "name": "Speedfire",
+                    "damagePerShot": 12,
+                    "timeBetweenFire": 100
+                }
+            },
+            "mags": {
+                "0": {
+                    "name": "No mag",
+                    "ammoInMag": 9
+                },
+                "1": {
+                    "name": "Rifle Mag 1",
+                    "ammoInMag": 10
+                },
+                "2": {
+                    "name": "Rifle Mag 2",
+                    "ammoInMag": 11
+                },
+                "3": {
+                    "name": "Rifle Mag 3",
+                    "ammoInMag": 12
+                }
+            }
+        }
+    },
     "characters": {
         "0": {
             "id": 0,

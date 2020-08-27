@@ -20,6 +20,7 @@ matchExt RESPONSES:
     focusedPlayer => id of focused player
     playerRotated => respond with the rotation parameter for the given player
     playerMoved => respond with the new x, y and rotation for the given player
+    weaponUpdate => data about player's weapon config
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -127,6 +128,15 @@ async function startMatch(io, matchId)
     }
     
     io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height]);
+    
+    //send players data about their weapon config
+    for(var socket in global.matches[matchId].connected)
+    {
+        var playerSocket = global.matches[matchId].connected[socket];
+        var player = await getPlayerBySocket(playerSocket);
+        if(player)
+            player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
+    }
 }
 
 async function getPlayerBySocket(socket)
