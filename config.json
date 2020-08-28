@@ -115,22 +115,33 @@
         "0": {
             "name": "Rifle",
             "description": "Single-fire rifle",
-            "maxAmmo": 100,
             "hopups": {
                 "0": {
                     "name": "No hopups",
                     "damagePerShot": 12,
-                    "timeBetweenFire": 200
+                    "timeToReload": 200,
+                    "timeBetweenFire": 200,
+                    "bulletTravelTime": 300,
+                    "bulletTravelDistance": 200,
+                    "maxAmmo": 100
                 },
                 "1": {
                     "name": "Piercer",
                     "damagePerShot": 15,
-                    "timeBetweenFire": 200
+                    "timeToReload": 200,
+                    "timeBetweenFire": 200,
+                    "bulletTravelTime": 300,
+                    "bulletTravelDistance": 200,
+                    "maxAmmo": 100
                 },
                 "2": {
                     "name": "Speedfire",
                     "damagePerShot": 12,
-                    "timeBetweenFire": 100
+                    "timeToReload": 200,
+                    "timeBetweenFire": 100,
+                    "bulletTravelTime": 300,
+                    "bulletTravelDistance": 200,
+                    "maxAmmo": 100
                 }
             },
             "mags": {
@@ -162,7 +173,9 @@
             "matchHeight": 95,
             "hitboxDiameter": 93,
             "centerX": 0.4,
-            "centerY": 0.5
+            "centerY": 0.5,
+            "bulletOriginX": 1,
+            "bulletOriginY": 0.55
         },
         "1": {
             "id": 1,
@@ -172,7 +185,9 @@
             "matchHeight": 95,
             "hitboxDiameter": 93,
             "centerX": 0.4,
-            "centerY": 0.5
+            "centerY": 0.5,
+            "bulletOriginX": 1,
+            "bulletOriginY": 0.55
         }
     }
 }

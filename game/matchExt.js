@@ -7,12 +7,12 @@ var lodash = require('lodash');
 matchExt HANDLERS:
     matchOk => handleJoinMatchOk
     rotatePlayer => handleRotatePlayer
-    movePlayer => handleMovePlayer
+    movePlayer => handleMovePlayer,
+    shoot => handlePlayerShoot
 */
 
 /*
 matchExt RESPONSES:
-    matchStarted => respond with an object, consisting of all players
     leaveMatch => the user is forced to leave to lobby
     matchFail => everybody has left the match
     playerLeft => respond with the player id that left
@@ -20,7 +20,8 @@ matchExt RESPONSES:
     focusedPlayer => id of focused player
     playerRotated => respond with the rotation parameter for the given player
     playerMoved => respond with the new x, y and rotation for the given player
-    weaponUpdate => data about player's weapon config
+    weaponUpdate => data about player's weapon (loaded ammo, available ammo to load, weapon name, mags & hopups)
+    playerShot => the angle and the origin x, y of the bullet and player id about the player who has shot
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -37,6 +38,9 @@ function handleMatchPacket(io, player, requestType, args)
             break;
         case "movePlayer":
             handleMovePlayer(io, player, args);
+            break;
+        case "shoot":
+            handlePlayerShoot(io, player);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -126,8 +130,18 @@ async function startMatch(io, matchId)
         else
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
     }
+
+    var biggestMagSize = 0;
+    for(var weapon in config.weapons)
+    {
+        for(var mag in config.weapons[weapon].mags)
+        {
+            if(config.weapons[weapon].mags[mag].ammoInMag > biggestMagSize)
+                biggestMagSize = config.weapons[weapon].mags[mag].ammoInMag;
+        }
+    }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize]);
     
     //send players data about their weapon config
     for(var socket in global.matches[matchId].connected)
@@ -282,6 +296,19 @@ function scaleHitboxToReal(x, y, width, height, hitbox)
     }
 
     return newHitbox;
+}
+
+function handlePlayerShoot(io, player)
+{
+    var now = new Date().valueOf();
+    var weaponParameters = config.weapons[String(player.matchData.weapon.id)].hopups[String(player.matchData.weapon.hopup)];
+    if((now - player.matchData.lastActions.lastShot) > weaponParameters.timeBetweenFire && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && player.matchData.weapon.loadedAmmo > 0 && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        player.matchData.lastActions.lastShot = now;
+        var bulletX = global.matches[player.matchId].playersObject[player.id].x + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation);
+        var bulletY = global.matches[player.matchId].playersObject[player.id].y + ((config.characters[String(player.playerData.character)].bulletOriginY - config.characters[String(player.playerData.character)].centerY) * config.characters[String(player.playerData.character)].matchHeight) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation) + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation);
+        io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation]);
+    }
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;

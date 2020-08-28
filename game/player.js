@@ -16,7 +16,7 @@ class Player
         this.playerData = {};
         this.joinedOk = false;
         this.matchId = 0;
-        this.matchDataDefault = { lastActions: {lastMoved: 0}, health: 100, heals: 0, weapon: {id: 0, ammo: 0, loadedAmmo: 0, hopup: 0, mag: 0} }
+        this.matchDataDefault = { lastActions: {lastMoved: 0, lastShot: 0, lastReloaded: 0}, health: 100, heals: 0, weapon: {id: 0, ammo: 0, loadedAmmo: 99, hopup: 0, mag: 0} }
         this.matchData = {};
         this.resetMatchData();
     }
