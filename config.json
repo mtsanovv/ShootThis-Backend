@@ -121,8 +121,8 @@
                     "damagePerShot": 12,
                     "timeToReload": 200,
                     "timeBetweenFire": 200,
-                    "bulletTravelTime": 300,
-                    "bulletTravelDistance": 200,
+                    "bulletTravelTime": 500,
+                    "bulletTravelDistance": 400,
                     "maxAmmo": 100
                 },
                 "1": {
