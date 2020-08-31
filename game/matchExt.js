@@ -124,7 +124,7 @@ async function startMatch(io, matchId)
                 }
             }
             rectanglesToCheckAgainst.push([x - width / 2, y - height / 2, width, height]);
-            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY};
+            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY, hitboxDiameter: config.characters[String(player.playerData.character)].hitboxDiameter};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
         }
         else
@@ -307,7 +307,7 @@ function handlePlayerShoot(io, player)
         player.matchData.lastActions.lastShot = now;
         var bulletX = global.matches[player.matchId].playersObject[player.id].x + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation);
         var bulletY = global.matches[player.matchId].playersObject[player.id].y + ((config.characters[String(player.playerData.character)].bulletOriginY - config.characters[String(player.playerData.character)].centerY) * config.characters[String(player.playerData.character)].matchHeight) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation) + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation);
-        io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation]);
+        io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation, weaponParameters.damagePerShot]);
     }
 }
 
