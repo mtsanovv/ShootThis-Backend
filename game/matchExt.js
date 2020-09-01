@@ -9,6 +9,7 @@ matchExt HANDLERS:
     rotatePlayer => handleRotatePlayer
     movePlayer => handleMovePlayer,
     shoot => handlePlayerShoot
+    gotShot => handlePlayerGotShot
 */
 
 /*
@@ -22,6 +23,8 @@ matchExt RESPONSES:
     playerMoved => respond with the new x, y and rotation for the given player
     weaponUpdate => data about player's weapon (loaded ammo, available ammo to load, weapon name, mags & hopups)
     playerShot => the angle and the origin x, y of the bullet and player id about the player who has shot
+    playerKilled => the name of the player you have killed
+    killed => the name of the player who has killed you and your placement
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -41,6 +44,9 @@ function handleMatchPacket(io, player, requestType, args)
             break;
         case "shoot":
             handlePlayerShoot(io, player);
+            break;
+        case "gotShot":
+            handlePlayerGotShot(io, player, args);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -104,7 +110,7 @@ async function startMatch(io, matchId)
     for(var socket in global.matches[matchId].connected)
     {
         var playerSocket = global.matches[matchId].connected[socket];
-        var player = await getPlayerBySocket(playerSocket);
+        var player = getPlayerBySocket(playerSocket);
         if(player)
         {
             var width = config.characters[String(player.playerData.character)].matchWidth;
@@ -124,7 +130,7 @@ async function startMatch(io, matchId)
                 }
             }
             rectanglesToCheckAgainst.push([x - width / 2, y - height / 2, width, height]);
-            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY, hitboxDiameter: config.characters[String(player.playerData.character)].hitboxDiameter};
+            global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, nickname: player.nickname, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY, hitboxDiameter: config.characters[String(player.playerData.character)].hitboxDiameter};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
         }
         else
@@ -147,17 +153,27 @@ async function startMatch(io, matchId)
     for(var socket in global.matches[matchId].connected)
     {
         var playerSocket = global.matches[matchId].connected[socket];
-        var player = await getPlayerBySocket(playerSocket);
+        var player = getPlayerBySocket(playerSocket);
         if(player)
             player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
     }
 }
 
-async function getPlayerBySocket(socket)
+function getPlayerBySocket(socket)
 {
     for(var player in global.players)
     {
         if(global.players[player].socket === socket)
+            return global.players[player];
+    }
+    return null;
+}
+
+function getPlayerById(id)
+{
+    for(var player in global.players)
+    {
+        if(global.players[player].id === id)
             return global.players[player];
     }
     return null;
@@ -171,6 +187,7 @@ function handleJoinMatchOk(player)
 
 function playerLeft(io, player)
 {
+    //the player at this point has already left the match and its room, but the matchId is still active
     if(!global.matches[player.matchId].connected.length && !global.matches[player.matchId].players.length && global.matches[player.matchId].connectionsCheckPassed)
     { 
         delete global.matches[player.matchId];
@@ -180,8 +197,8 @@ function playerLeft(io, player)
     if(global.matches[player.matchId].connected.length)
     {
         io.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
-        //checks for how many people left, if player in playersObject etc
-        //REMEMBER THE PLAYER HAS ALREADY BEEN REMOVED FROM THE ROOM, BUT THE OTHERS HAVE TO REMOVE HIM TOO
+        if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+            delete global.matches[player.matchId].playersObject[player.id];
     }
 }
 
@@ -308,6 +325,14 @@ function handlePlayerShoot(io, player)
         var bulletX = global.matches[player.matchId].playersObject[player.id].x + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation);
         var bulletY = global.matches[player.matchId].playersObject[player.id].y + ((config.characters[String(player.playerData.character)].bulletOriginY - config.characters[String(player.playerData.character)].centerY) * config.characters[String(player.playerData.character)].matchHeight) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation) + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation);
         io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation, weaponParameters.damagePerShot]);
+    }
+}
+
+function handlePlayerGotShot(io, player, args)
+{
+    if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        //handle player got shot
     }
 }
 
