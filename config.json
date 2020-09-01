@@ -79,7 +79,9 @@
         "playerSpeed": 20,
         "timeBetweenMovement": 17,
         "minObstacles": 100,
-        "maxObstacles": 300
+        "maxObstacles": 300,
+        "minHealth": 0,
+        "maxHealth": 100
     },
     "wallTiles": {
         "horizontal": {

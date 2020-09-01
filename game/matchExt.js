@@ -46,7 +46,7 @@ function handleMatchPacket(io, player, requestType, args)
             handlePlayerShoot(io, player);
             break;
         case "gotShot":
-            handlePlayerGotShot(io, player, args);
+            handlePlayerGotShot(player, args);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -328,7 +328,7 @@ function handlePlayerShoot(io, player)
     }
 }
 
-function handlePlayerGotShot(io, player, args)
+function handlePlayerGotShot(player, args)
 {
     if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
