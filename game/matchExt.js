@@ -332,6 +332,17 @@ function handlePlayerGotShot(player, args)
 {
     if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
+        player.matchData.health = player.matchData.health - args[1];
+        if(player.matchData.health < config.gameConfig.minHealth)
+        {
+            var killer = getPlayerById(args[0]);
+            if(killer !== null)
+            {
+                killer.socket.emit("matchExt", "playerKilled", [player.nickname]); 
+                player.socket.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
+                delete global.matches[player.matchId].playersObject[player.id];
+            }
+        }
         //handle player got shot
     }
 }
