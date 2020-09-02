@@ -182,7 +182,10 @@ function getPlayerById(id)
 function handleJoinMatchOk(player)
 {
     if(global.matches[player.matchId].players.indexOf(player.socket) !== -1 && global.matches[player.matchId].connected.indexOf(player.socket) === -1)
+    {
         global.matches[player.matchId].connected.push(player.socket);
+        global.matches[player.matchId].connectedToMatch++;
+    }
 }
 
 function playerLeft(io, player)
@@ -324,7 +327,7 @@ function handlePlayerShoot(io, player)
         player.matchData.lastActions.lastShot = now;
         var bulletX = global.matches[player.matchId].playersObject[player.id].x + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation);
         var bulletY = global.matches[player.matchId].playersObject[player.id].y + ((config.characters[String(player.playerData.character)].bulletOriginY - config.characters[String(player.playerData.character)].centerY) * config.characters[String(player.playerData.character)].matchHeight) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation) + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation);
-        io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation, weaponParameters.damagePerShot]);
+        io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation, weaponParameters.damagePerShot, weaponParameters.bulletSoundMaxDistance]);
     }
 }
 
@@ -332,18 +335,19 @@ function handlePlayerGotShot(player, args)
 {
     if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
-        player.matchData.health = player.matchData.health - args[1];
+        player.matchData.health -= args[1];
         if(player.matchData.health < config.gameConfig.minHealth)
         {
             var killer = getPlayerById(args[0]);
             if(killer !== null)
             {
-                killer.socket.emit("matchExt", "playerKilled", [player.nickname]); 
+                killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
+                player.socket.emit("matchExt", "killed", [killer.nickname, Object.keys(global.matches[player.matchId].playersObject).length - 1 + "/" + global.matches[player.matchId].connectedToMatch]);
                 player.socket.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
+                //stuff to push to database for the killed player for their last match data
                 delete global.matches[player.matchId].playersObject[player.id];
             }
         }
-        //handle player got shot
     }
 }
 

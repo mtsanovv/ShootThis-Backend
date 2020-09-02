@@ -16,7 +16,7 @@ class Player
         this.playerData = {};
         this.joinedOk = false;
         this.matchId = 0;
-        this.matchDataDefault = { lastActions: {lastMoved: 0, lastShot: 0, lastReloaded: 0}, health: config.gameConfig.maxHealth, heals: 0, weapon: {id: 0, ammo: 0, hopup: 0, mag: 0, loadedAmmo: config.weapons[0].hopups[0]} }
+        this.matchDataDefault = { lastActions: {lastMoved: 0, lastShot: 0, lastReloaded: 0}, health: config.gameConfig.maxHealth, heals: 0, weapon: {id: 0, ammo: 0, hopup: 0, mag: 0, loadedAmmo: config.weapons[0].mags[0].ammoInMag} }
         this.matchData = {};
         this.resetMatchData();
     }
