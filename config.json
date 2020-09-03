@@ -72,16 +72,17 @@
         "maxMatchTime": 1200000,
         "timeToWaitBeforeMatch": 1000,
         "xpToLevel": 15000,
-        "gameHeight": 10240,
-        "gameWidth": 10240,
-        "cameraBoundX": 11520,
-        "cameraBoundY": 11520,
+        "gameHeight": 7424,
+        "gameWidth": 7424,
+        "cameraBoundX": 8960,
+        "cameraBoundY": 8960,
         "playerSpeed": 20,
         "timeBetweenMovement": 17,
         "minObstacles": 100,
         "maxObstacles": 300,
         "minHealth": 0,
-        "maxHealth": 100
+        "maxHealth": 100,
+        "timeToHeal": 400
     },
     "wallTiles": {
         "horizontal": {

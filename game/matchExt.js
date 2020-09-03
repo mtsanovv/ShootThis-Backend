@@ -109,7 +109,7 @@ async function startMatch(io, matchId)
     {
         if(!config.spawnables[spawnable].active)
             continue;
-            
+
         var spawnablesToSpawn = integerInInterval(config.spawnables[spawnable].minSpawnCount, config.spawnables[spawnable].maxSpawnCount);
         for(var i = 0; i < spawnablesToSpawn; i++)
         {
@@ -369,6 +369,7 @@ function handlePlayerGotShot(player, args)
             if(killer !== null)
             {
                 killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
+                killer.matchData.kills++;
                 player.socket.emit("matchExt", "killed", [killer.nickname, Object.keys(global.matches[player.matchId].playersObject).length - 1 + "/" + global.matches[player.matchId].connectedToMatch]);
                 player.socket.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
                 //stuff to push to database for the killed player for their last match data
