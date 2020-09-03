@@ -72,10 +72,10 @@
         "maxMatchTime": 1200000,
         "timeToWaitBeforeMatch": 1000,
         "xpToLevel": 15000,
-        "gameHeight": 7424,
-        "gameWidth": 7424,
-        "cameraBoundX": 8960,
-        "cameraBoundY": 8960,
+        "gameHeight": 10240,
+        "gameWidth": 10240,
+        "cameraBoundX": 11520,
+        "cameraBoundY": 11520,
         "playerSpeed": 20,
         "timeBetweenMovement": 17,
         "minObstacles": 100,
@@ -109,8 +109,75 @@
     },
     "spawnables":
     {
-        "0": {
-
+        "weapons-0-hopups-1": {
+            "active": true,
+            "name": "Piercer",
+            "type": "matchUIHopups",
+            "spriteKey": "01.png",
+            "matchWidth": 35,
+            "matchHeight": 35,
+            "minSpawnCount": 2,
+            "maxSpawnCount": 5
+        },
+        "weapons-0-hopups-2": {
+            "active": true,
+            "name": "Speedfire",
+            "type": "matchUIHopups",
+            "spriteKey": "02.png",
+            "matchWidth": 35,
+            "matchHeight": 35,
+            "minSpawnCount": 2,
+            "maxSpawnCount": 5
+        },
+        "weapons-0-mags-1": {
+            "active": true,
+            "name": "Rifle Mag 1",
+            "type": "matchUIMags",
+            "spriteKey": "01.png",
+            "matchWidth": 35,
+            "matchHeight": 35,
+            "minSpawnCount": 10,
+            "maxSpawnCount": 15
+        },
+        "weapons-0-mags-2": {
+            "active": true,
+            "name": "Rifle Mag 2",
+            "type": "matchUIMags",
+            "spriteKey": "02.png",
+            "matchWidth": 35,
+            "matchHeight": 35,
+            "minSpawnCount": 5,
+            "maxSpawnCount": 10
+        },
+        "weapons-0-mags-3": {
+            "active": true,
+            "name": "Rifle Mag 3",
+            "type": "matchUIMags",
+            "spriteKey": "03.png",
+            "matchWidth": 35,
+            "matchHeight": 35,
+            "minSpawnCount": 1,
+            "maxSpawnCount": 5
+        },
+        "spawnables-0-health-0": {
+            "active": true,
+            "name": "25 Health Orb",
+            "type": "spawnablesSprites",
+            "spriteKey": "0.png",
+            "matchWidth": 40,
+            "matchHeight": 40,
+            "minSpawnCount": 50,
+            "maxSpawnCount": 100
+        },
+        "weapons-0-ammo-0": {
+            "active": true,
+            "name": "Rifle 10 Ammo",
+            "type": "spawnablesSprites",
+            "spriteKey": "1.png",
+            "matchWidth": 43,
+            "matchHeight": 25,
+            "minSpawnCount": 50,
+            "maxSpawnCount": 150
         }
     },
     "weapons": {

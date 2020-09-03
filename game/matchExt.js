@@ -105,6 +105,33 @@ async function startMatch(io, matchId)
     }
 
     //spawn spawnables
+    for(var spawnable in config.spawnables)
+    {
+        if(!config.spawnables[spawnable].active)
+            continue;
+            
+        var spawnablesToSpawn = integerInInterval(config.spawnables[spawnable].minSpawnCount, config.spawnables[spawnable].maxSpawnCount);
+        for(var i = 0; i < spawnablesToSpawn; i++)
+        {
+            var width = config.spawnables[spawnable].matchWidth;
+            var height = config.spawnables[spawnable].matchHeight;
+            var x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+            var y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
+
+            for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
+            {
+                var isIntersecting = intersects.boxBox(x, y, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
+                if(isIntersecting)
+                {
+                    x = integerInInterval(0 + width + config.wallTiles.vertical.width, config.gameConfig.gameWidth - width - config.wallTiles.vertical.width);
+                    y = integerInInterval(0 + height + config.wallTiles.horizontal.height, config.gameConfig.gameHeight - height - config.wallTiles.horizontal.height);
+                    j = -1;
+                }
+            }
+            rectanglesToCheckAgainst.push([x, y, width, height]);
+            global.matches[matchId].spawnablesArray.push({id: spawnable, x: x, y: y, name: config.spawnables[spawnable].name, type: config.spawnables[spawnable].type, spriteKey: config.spawnables[spawnable].spriteKey});
+        }
+    }
 
     //spawn players
     for(var socket in global.matches[matchId].connected)
