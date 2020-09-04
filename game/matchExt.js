@@ -24,7 +24,8 @@ matchExt RESPONSES:
     weaponUpdate => data about player's weapon (loaded ammo, available ammo to load, weapon name, mags & hopups)
     playerShot => the angle and the origin x, y of the bullet and player id about the player who has shot
     playerKilled => the name of the player you have killed
-    killed => the name of the player who has killed you and your placement
+    killed => the name of the player who has killed you and your placement,
+    healthUpdate => the health a player has, max health bar width and max health to determine the scaling factor
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -182,7 +183,10 @@ async function startMatch(io, matchId)
         var playerSocket = global.matches[matchId].connected[socket];
         var player = getPlayerBySocket(playerSocket);
         if(player)
+        {
             player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
+            player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
+        }
     }
 }
 
@@ -376,6 +380,8 @@ function handlePlayerGotShot(player, args)
                 delete global.matches[player.matchId].playersObject[player.id];
             }
         }
+        else
+            player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
     }
 }
 

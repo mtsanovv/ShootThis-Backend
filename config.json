@@ -82,7 +82,8 @@
         "maxObstacles": 300,
         "minHealth": 0,
         "maxHealth": 100,
-        "timeToHeal": 400
+        "timeToHeal": 400,
+        "healthBarMaxWidth": 220
     },
     "wallTiles": {
         "horizontal": {
