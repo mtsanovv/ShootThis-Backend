@@ -85,6 +85,10 @@
         "timeToHeal": 400,
         "healthBarMaxWidth": 220
     },
+    "hints":
+    {
+        "reloadHint": "Press R to reload your gun"
+    },
     "wallTiles": {
         "horizontal": {
             "width": 55,
@@ -195,7 +199,8 @@
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
                     "maxAmmo": 100,
-                    "bulletSoundMaxDistance": 1500
+                    "bulletSoundMaxDistance": 1500,
+                    "bulletsPerShot": 1
                 },
                 "1": {
                     "name": "Piercer",
@@ -205,7 +210,8 @@
                     "bulletTravelTime": 300,
                     "bulletTravelDistance": 200,
                     "maxAmmo": 100,
-                    "bulletSoundMaxDistance": 1500
+                    "bulletSoundMaxDistance": 1500,
+                    "bulletsPerShot": 1
                 },
                 "2": {
                     "name": "Speedfire",
@@ -215,7 +221,8 @@
                     "bulletTravelTime": 300,
                     "bulletTravelDistance": 200,
                     "maxAmmo": 100,
-                    "bulletSoundMaxDistance": 1500
+                    "bulletSoundMaxDistance": 1500,
+                    "bulletsPerShot": 1
                 }
             },
             "mags": {

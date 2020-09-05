@@ -10,6 +10,7 @@ matchExt HANDLERS:
     movePlayer => handleMovePlayer,
     shoot => handlePlayerShoot
     gotShot => handlePlayerGotShot
+    reload => handlePlayerReload
 */
 
 /*
@@ -26,6 +27,7 @@ matchExt RESPONSES:
     playerKilled => the name of the player you have killed
     killed => the name of the player who has killed you and your placement,
     healthUpdate => the health a player has, max health bar width and max health to determine the scaling factor
+    ammoUpdate => data about player's weapon - loaded & available ammo
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -48,6 +50,9 @@ function handleMatchPacket(io, player, requestType, args)
             break;
         case "gotShot":
             handlePlayerGotShot(player, args);
+            break;
+        case "reload":
+            handlePlayerReload(player);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -353,12 +358,37 @@ function handlePlayerShoot(io, player)
 {
     var now = new Date().valueOf();
     var weaponParameters = config.weapons[String(player.matchData.weapon.id)].hopups[String(player.matchData.weapon.hopup)];
-    if((now - player.matchData.lastActions.lastShot) > weaponParameters.timeBetweenFire && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && player.matchData.weapon.loadedAmmo > 0 && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    if((now - player.matchData.lastActions.lastHealed) > config.gameConfig.timeToHeal && (now - player.matchData.lastActions.lastShot) > weaponParameters.timeBetweenFire && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && player.matchData.weapon.loadedAmmo > 0 && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
         player.matchData.lastActions.lastShot = now;
+        player.matchData.weapon.loadedAmmo -= weaponParameters.bulletsPerShot;
         var bulletX = global.matches[player.matchId].playersObject[player.id].x + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.cos(global.matches[player.matchId].playersObject[player.id].rotation);
         var bulletY = global.matches[player.matchId].playersObject[player.id].y + ((config.characters[String(player.playerData.character)].bulletOriginY - config.characters[String(player.playerData.character)].centerY) * config.characters[String(player.playerData.character)].matchHeight) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation) + ((config.characters[String(player.playerData.character)].bulletOriginX - config.characters[String(player.playerData.character)].centerX) * config.characters[String(player.playerData.character)].matchWidth) * Math.sin(global.matches[player.matchId].playersObject[player.id].rotation);
         io.to(String(player.matchId)).emit("matchExt", "playerShot", [player.id, now, weaponParameters.bulletTravelTime, weaponParameters.bulletTravelDistance, bulletX, bulletY, global.matches[player.matchId].playersObject[player.id].rotation, weaponParameters.damagePerShot, weaponParameters.bulletSoundMaxDistance]);
+        player.socket.emit("matchExt", "ammoUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo]);
+    }
+}
+
+function handlePlayerReload(player)
+{
+    var now = new Date().valueOf();
+    var weaponParameters = config.weapons[String(player.matchData.weapon.id)].hopups[String(player.matchData.weapon.hopup)];
+    var weaponAmmo = config.weapons[String(player.matchData.weapon.id)].mags[String(player.matchData.weapon.mag)];
+    
+    if((now - player.matchData.lastActions.lastHealed) > config.gameConfig.timeToHeal && (now - player.matchData.lastActions.lastShot) > weaponParameters.timeBetweenFire && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && player.matchData.weapon.loadedAmmo < weaponAmmo.ammoInMag && player.matchData.weapon.ammo > 0 && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        player.matchData.lastActions.lastReloaded = now;
+        if(player.matchData.weapon.ammo - weaponAmmo.ammoInMag < 0)
+        {
+            player.matchData.weapon.loadedAmmo += player.matchData.weapon.ammo;
+            player.matchData.weapon.ammo = 0;
+        }
+        else
+        {
+            player.matchData.weapon.loadedAmmo = weaponAmmo.ammoInMag;
+            player.matchData.weapon.ammo -= weaponAmmo.ammoInMag;
+        }
+        player.socket.emit("matchExt", "ammoUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo]);
     }
 }
 
@@ -372,11 +402,11 @@ function handlePlayerGotShot(player, args)
             var killer = getPlayerById(args[0]);
             if(killer !== null)
             {
+                //stuff to push to database for the killed player for their last match data
                 killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
                 killer.matchData.kills++;
                 player.socket.emit("matchExt", "killed", [killer.nickname, Object.keys(global.matches[player.matchId].playersObject).length + "/" + global.matches[player.matchId].connectedToMatch]);
                 player.socket.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
-                //stuff to push to database for the killed player for their last match data
                 delete global.matches[player.matchId].playersObject[player.id];
             }
         }

@@ -27,6 +27,7 @@ This is the backend server, written in Node.js. The database engine used in the 
 	- "database" are the database details for the main database
 	- "servers" are the servers that can be started. The available types of servers are "login" and "game". An example has already been done. **Please note that if you run the different servers on different datacenters, all of them should have the same config.json.** Additionally, dbConnections is the size of the connection pool. Multiply that number by the number of threads on your system to figure out how many connections will be created (that's per server).
 	- "gameConfig" are configurations for the game itself (i.e. max match length, players per match etc.)
+	- "hints" are the game hints
 	- "wallTiles" are the configurations for the horizontal and vertical tiles of the game borders (which are walls as assets)
 	- "obstacles" are the configurations for the different obstacles that are spawned around the map
 	- "spawnables" are the configurations for the different items that spawn around the map
