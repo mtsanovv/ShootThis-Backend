@@ -87,7 +87,8 @@
     },
     "hints":
     {
-        "reloadHint": "Press R to reload your gun"
+        "reloadHint": "Press R to reload",
+        "pickupHint": "Press E to pick up"
     },
     "wallTiles": {
         "horizontal": {

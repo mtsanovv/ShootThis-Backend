@@ -135,7 +135,7 @@ async function startMatch(io, matchId)
                 }
             }
             rectanglesToCheckAgainst.push([x, y, width, height]);
-            global.matches[matchId].spawnablesArray.push({id: spawnable, x: x, y: y, name: config.spawnables[spawnable].name, type: config.spawnables[spawnable].type, spriteKey: config.spawnables[spawnable].spriteKey});
+            global.matches[matchId].spawnablesArray.push({id: spawnable, x: x, y: y, width: width, height: height, name: config.spawnables[spawnable].name, type: config.spawnables[spawnable].type, spriteKey: config.spawnables[spawnable].spriteKey});
         }
     }
 
@@ -180,7 +180,7 @@ async function startMatch(io, matchId)
         }
     }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize, config.hints]);
     
     //send players data about their weapon config
     for(var socket in global.matches[matchId].connected)
