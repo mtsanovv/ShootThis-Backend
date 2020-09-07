@@ -10,7 +10,8 @@ matchExt HANDLERS:
     movePlayer => handleMovePlayer,
     shoot => handlePlayerShoot
     gotShot => handlePlayerGotShot
-    reload => handlePlayerReload
+    reload => handlePlayerReload,
+    pickItem => handlePlayerPickItem
 */
 
 /*
@@ -27,7 +28,8 @@ matchExt RESPONSES:
     playerKilled => the name of the player you have killed
     killed => the name of the player who has killed you and your placement,
     healthUpdate => the health a player has, max health bar width and max health to determine the scaling factor
-    ammoUpdate => data about player's weapon - loaded & available ammo
+    ammoUpdate => data about player's weapon - loaded & available ammo,
+    spawnablesUpdate => data about removed spawnables and added spawnables
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -53,6 +55,9 @@ function handleMatchPacket(io, player, requestType, args)
             break;
         case "reload":
             handlePlayerReload(player);
+            break;
+        case "pickItem":
+            handlePlayerPickItem(io, player);
             break;
         default:
             logger.log("Invalid matchExt handler: " + requestType, 'w');
@@ -413,6 +418,66 @@ function handlePlayerGotShot(player, args)
         else
             player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
     }
+}
+
+function handlePlayerPickItem(io, player)
+{
+    var now = new Date().valueOf();
+    var weaponParameters = config.weapons[String(player.matchData.weapon.id)].hopups[String(player.matchData.weapon.hopup)];
+    
+    if((now - player.matchData.lastActions.lastHealed) > config.gameConfig.timeToHeal && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+    {
+        var spawnableKey = -1;
+        var spawnablesToAdd = [];
+
+        for(var spawnable in global.matches[player.matchId].spawnablesArray)
+        {
+            let spawnableData = global.matches[player.matchId].spawnablesArray[spawnable];
+            if(intersects.boxCircle(spawnableData.x, spawnableData.y, spawnableData.width, spawnableData.height, global.matches[player.matchId].playersObject[player.id].x, global.matches[player.matchId].playersObject[player.id].y, global.matches[player.matchId].playersObject[player.id].hitboxDiameter))
+            {
+                spawnableKey = spawnable;
+                break;
+            }
+        }
+
+        if(spawnableKey !== -1)
+        {
+            var spawnableData = global.matches[player.matchId].spawnablesArray[spawnableKey];
+            switch(spawnableData.id)
+            {
+                case "weapons-0-hopups-1":
+                case "weapons-0-hopups-2":
+                    let idInfo = spawnableData.id.split("-");
+                    if(player.matchData.weapon.id == idInfo[1])
+                    {
+                        if(player.matchData.weapon.hopup != idInfo[3])
+                        {
+                            if(player.matchData.weapon.hopup !== 0)
+                            {
+                                let hopupIdToSpawn = "weapons-" + player.matchData.weapon.id + "-hopups-" + player.matchData.weapon.hopup;
+                                spawnablesToAdd.push({id: hopupIdToSpawn, x: spawnableData.x, y: spawnableData.y, width: config.spawnables[hopupIdToSpawn].matchWidth, height: config.spawnables[hopupIdToSpawn].matchHeight, name: config.spawnables[hopupIdToSpawn].name, type: config.spawnables[hopupIdToSpawn].type, spriteKey: config.spawnables[hopupIdToSpawn].spriteKey});
+                            }
+                            player.matchData.weapon.hopup = Number(idInfo[3]);
+                            player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
+                            updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+}
+
+function updateSpawnablesInWorld(io, matchId, keyToRemove, spawnablesToAdd)
+{
+    if(keyToRemove !== -1)
+        global.matches[matchId].spawnablesArray.splice(keyToRemove, 1);
+
+    for(var spawnable in spawnablesToAdd)
+        global.matches[matchId].spawnablesArray.push(spawnablesToAdd[spawnable]);
+
+    io.to(String(matchId)).emit("matchExt", "spawnablesUpdate", [keyToRemove, spawnablesToAdd]);
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;
