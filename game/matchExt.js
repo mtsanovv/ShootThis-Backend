@@ -29,7 +29,9 @@ matchExt RESPONSES:
     killed => the name of the player who has killed you and your placement,
     healthUpdate => the health a player has, max health bar width and max health to determine the scaling factor
     ammoUpdate => data about player's weapon - loaded & available ammo,
-    spawnablesUpdate => data about removed spawnables and added spawnables
+    spawnablesUpdate => data about removed spawnables and added spawnables,
+    damageDealt => player id and damage dealt to them
+    showHint => hint to show
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -390,8 +392,8 @@ function handlePlayerReload(player)
         }
         else
         {
+            player.matchData.weapon.ammo -= weaponAmmo.ammoInMag - player.matchData.weapon.loadedAmmo;
             player.matchData.weapon.loadedAmmo = weaponAmmo.ammoInMag;
-            player.matchData.weapon.ammo -= weaponAmmo.ammoInMag;
         }
         player.socket.emit("matchExt", "ammoUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo]);
     }
@@ -402,9 +404,9 @@ function handlePlayerGotShot(player, args)
     if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
         player.matchData.health -= args[1];
+        var killer = getPlayerById(args[0]);
         if(player.matchData.health < config.gameConfig.minHealth)
         {
-            var killer = getPlayerById(args[0]);
             if(killer !== null)
             {
                 //stuff to push to database for the killed player for their last match data
@@ -416,7 +418,11 @@ function handlePlayerGotShot(player, args)
             }
         }
         else
+        {
             player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
+            if(killer !== null)
+                killer.socket.emit("matchExt", "damageDealt", [player.id, args[1]]);
+        }
     }
 }
 
@@ -443,11 +449,11 @@ function handlePlayerPickItem(io, player)
         if(spawnableKey !== -1)
         {
             var spawnableData = global.matches[player.matchId].spawnablesArray[spawnableKey];
-            switch(spawnableData.id)
+            var idInfo = spawnableData.id.split("-");
+            switch(idInfo[2])
             {
-                case "weapons-0-hopups-1":
-                case "weapons-0-hopups-2":
-                    let idInfo = spawnableData.id.split("-");
+                //hopups for all weapons
+                case "hopups":
                     if(player.matchData.weapon.id == idInfo[1])
                     {
                         if(player.matchData.weapon.hopup != idInfo[3])
@@ -461,7 +467,67 @@ function handlePlayerPickItem(io, player)
                             player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
                             updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
                         }
+                        else
+                            player.socket.emit("matchExt", "showHint", [config.hints.errorAttachingHopup]);
                     }
+                    break;
+
+                //ammo for all weapons
+                case "ammo":
+                    if(player.matchData.weapon.id == idInfo[1])
+                    {
+                        if(player.matchData.weapon.ammo < weaponParameters.maxAmmo)
+                        {
+                            player.matchData.weapon.ammo += config.spawnables[spawnableData.id].ammoGiven;
+                            if(player.matchData.weapon.ammo > weaponParameters.maxAmmo)
+                                player.matchData.weapon.ammo = weaponParameters.maxAmmo;
+
+                            player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
+                            updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
+                        }
+                        else
+                            player.socket.emit("matchExt", "showHint", [config.hints.errorPickingAmmo]);
+                    }
+                    break;
+                
+                //mag extensions for all weapons
+                case "mags":
+                    if(player.matchData.weapon.id == idInfo[1])
+                    {
+                        if(player.matchData.weapon.mag != idInfo[3])
+                        {
+                            if(player.matchData.weapon.mag < Number(idInfo[3]))
+                            {
+                                if(player.matchData.weapon.mag !== 0)
+                                {
+                                    let magIdToSpawn = "weapons-" + player.matchData.weapon.id + "-mags-" + player.matchData.weapon.mag;
+                                    spawnablesToAdd.push({id: magIdToSpawn, x: spawnableData.x, y: spawnableData.y, width: config.spawnables[magIdToSpawn].matchWidth, height: config.spawnables[magIdToSpawn].matchHeight, name: config.spawnables[magIdToSpawn].name, type: config.spawnables[magIdToSpawn].type, spriteKey: config.spawnables[magIdToSpawn].spriteKey});
+                                }
+                                player.matchData.weapon.mag = Number(idInfo[3]);
+                                player.socket.emit("matchExt", "weaponUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo, player.matchData.weapon.hopup, player.matchData.weapon.mag, player.matchData.weapon.id, config.weapons[String(player.matchData.weapon.id)].name]);
+                                updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
+                            }
+                            else
+                                player.socket.emit("matchExt", "showHint", [config.hints.errorAttachingMag2]);
+                        }
+                        else
+                            player.socket.emit("matchExt", "showHint", [config.hints.errorAttachingMag1]);
+                    }
+                    break;
+
+                case "health":
+                    if(player.matchData.health < config.gameConfig.maxHealth)
+                    {
+                        player.matchData.health += config.spawnables[spawnableData.id].healthGiven;
+                        if(player.matchData.health > config.gameConfig.maxHealth)
+                            player.matchData.health = config.gameConfig.maxHealth;
+                        player.matchData.lastActions.lastHealed = new Date().valueOf();
+                        player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
+                        updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
+                        player.socket.emit("matchExt", "showHint", [config.hints.healingHint + String(Math.round(config.gameConfig.timeToHeal / 100) / 10) + "s", config.gameConfig.timeToHeal]);
+                    }
+                    else
+                        player.socket.emit("matchExt", "showHint", [config.hints.errorPickingHealth]);
                     break;
             }
         }

@@ -82,13 +82,19 @@
         "maxObstacles": 300,
         "minHealth": 0,
         "maxHealth": 100,
-        "timeToHeal": 400,
+        "timeToHeal": 1000,
         "healthBarMaxWidth": 220
     },
     "hints":
     {
         "reloadHint": "Press R to reload",
-        "pickupHint": "Press E to pick up"
+        "pickupHint": "Press E to pick up",
+        "errorAttachingHopup": "You already have this hopup",
+        "errorPickingAmmo": "You cannot carry more ammo",
+        "errorPickingHealth": "You already have full health",
+        "errorAttachingMag1": "You already have this mag",
+        "errorAttachingMag2": "You already have a better mag",
+        "healingHint": "Healing for "
     },
     "wallTiles": {
         "horizontal": {
@@ -174,7 +180,8 @@
             "matchWidth": 40,
             "matchHeight": 40,
             "minSpawnCount": 15,
-            "maxSpawnCount": 25
+            "maxSpawnCount": 25,
+            "healthGiven": 5
         },
         "spawnables-0-health-1": {
             "active": true,
@@ -184,7 +191,8 @@
             "matchWidth": 40,
             "matchHeight": 40,
             "minSpawnCount": 15,
-            "maxSpawnCount": 25
+            "maxSpawnCount": 25,
+            "healthGiven": 10
         },
         "spawnables-0-health-2": {
             "active": true,
@@ -194,7 +202,8 @@
             "matchWidth": 40,
             "matchHeight": 40,
             "minSpawnCount": 15,
-            "maxSpawnCount": 25
+            "maxSpawnCount": 25,
+            "healthGiven": 20
         },
         "weapons-0-ammo-0": {
             "active": true,
@@ -203,8 +212,9 @@
             "spriteKey": "1.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 15,
-            "maxSpawnCount": 50
+            "minSpawnCount": 100,
+            "maxSpawnCount": 120,
+            "ammoGiven": 5
         },
         "weapons-0-ammo-1": {
             "active": true,
@@ -213,8 +223,9 @@
             "spriteKey": "1.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 15,
-            "maxSpawnCount": 50
+            "minSpawnCount": 100,
+            "maxSpawnCount": 120,
+            "ammoGiven": 10
         },
         "weapons-0-ammo-2": {
             "active": true,
@@ -223,8 +234,9 @@
             "spriteKey": "1.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 15,
-            "maxSpawnCount": 50
+            "minSpawnCount": 100,
+            "maxSpawnCount": 120,
+            "ammoGiven": 20
         }
     },
     "weapons": {
@@ -235,8 +247,8 @@
                 "0": {
                     "name": "No hopups",
                     "damagePerShot": 12,
-                    "timeToReload": 200,
-                    "timeBetweenFire": 200,
+                    "timeToReload": 400,
+                    "timeBetweenFire": 250,
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
                     "maxAmmo": 100,
@@ -246,10 +258,10 @@
                 "1": {
                     "name": "Piercer",
                     "damagePerShot": 15,
-                    "timeToReload": 200,
-                    "timeBetweenFire": 200,
-                    "bulletTravelTime": 300,
-                    "bulletTravelDistance": 200,
+                    "timeToReload": 400,
+                    "timeBetweenFire": 250,
+                    "bulletTravelTime": 500,
+                    "bulletTravelDistance": 400,
                     "maxAmmo": 100,
                     "bulletSoundMaxDistance": 1500,
                     "bulletsPerShot": 1
@@ -258,9 +270,9 @@
                     "name": "Speedfire",
                     "damagePerShot": 12,
                     "timeToReload": 200,
-                    "timeBetweenFire": 100,
-                    "bulletTravelTime": 300,
-                    "bulletTravelDistance": 200,
+                    "timeBetweenFire": 150,
+                    "bulletTravelTime": 500,
+                    "bulletTravelDistance": 400,
                     "maxAmmo": 100,
                     "bulletSoundMaxDistance": 1500,
                     "bulletsPerShot": 1
