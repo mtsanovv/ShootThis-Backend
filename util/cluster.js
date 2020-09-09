@@ -17,6 +17,12 @@ function init()
         
         logger.log("Starting ShootThis-Backend for " + global.serverId + " on " + global.serverDetails.address + ":" + global.serverDetails.port);
 
+        if(config.originsEnabled) 
+        {
+            logger.log("ATTENTION! Allowed hosts (origins) are ENABLED and if misconfigured, the allowed hosts may not be able to connect to the server.", "w");
+            io.origins(global.origins);
+        }
+
         for (var i = 0; i < os.cpus().length; i++)
             cluster.fork();
         
@@ -39,6 +45,8 @@ function init()
         var redis = require('socket.io-redis');
         
         io.adapter(redis({ host: config["redis"].host, port: config["redis"].port }));
+
+        if(config.originsEnabled) io.origins(global.origins);
 
         network.init(io);
         errorHandling.init(true, io);

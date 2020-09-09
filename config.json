@@ -2,6 +2,7 @@
     "errorCodes": {
         "ERROR_CRITICAL": 121314
     },
+    "originsEnabled": true,
     "origins": {
         "//localhost": {
             "ports": ["80", "4424"],
