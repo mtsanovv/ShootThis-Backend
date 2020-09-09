@@ -125,7 +125,7 @@ function handleLoginSuccessful(player, username)
 
 function handleDisconnection(socket)
 {
-    for(var player in global.players)
+    for(var player = 0; player < global.players.length; player++)
         if(global.players[player].socket == socket)
             global.players.splice(player, 1);
     logger.log("User disconnected");

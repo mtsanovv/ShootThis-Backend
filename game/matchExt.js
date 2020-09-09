@@ -53,7 +53,7 @@ function handleMatchPacket(io, player, requestType, args)
             handlePlayerShoot(io, player);
             break;
         case "gotShot":
-            handlePlayerGotShot(player, args);
+            handlePlayerGotShot(io, player, args);
             break;
         case "reload":
             handlePlayerReload(player);
@@ -71,7 +71,7 @@ async function startMatch(io, matchId)
 {
     global.matches[matchId].started = true;
     await new Promise(resolve => setTimeout(resolve, config.gameConfig.timeToWaitBeforeMatch));
-    for(var player in global.matches[matchId].players)
+    for(var player = 0; player < global.matches[matchId].players.length; player++)
     {
         var socket = global.matches[matchId].players[player];
         if(global.matches[matchId].connected.indexOf(socket) === -1)
@@ -82,7 +82,7 @@ async function startMatch(io, matchId)
 
     if(global.matches[matchId].connected.length < config.gameConfig.minPlayersPerMatch)
     {
-        for(var socket in global.matches[matchId].connected)
+        for(var socket = 0; socket < global.matches[matchId].connected.length; socket++)
             global.matches[matchId].connected[socket].emit("matchExt", "matchFail");
         global.matches[matchId].started = false;
         global.matches[matchId].failed = true;
@@ -114,7 +114,7 @@ async function startMatch(io, matchId)
             }
         }
         rectanglesToCheckAgainst.push([x, y, width, height]);
-        global.matches[matchId].obstaclesArray.push({type: obstacleType, x: x, y: y});
+        global.matches[matchId].obstaclesArray.push({type: obstacleType, x: x, y: y, width: width, height: height});
     }
 
     //spawn spawnables
@@ -147,7 +147,7 @@ async function startMatch(io, matchId)
     }
 
     //spawn players
-    for(var socket in global.matches[matchId].connected)
+    for(var socket = 0; socket < global.matches[matchId].connected.length; socket++)
     {
         var playerSocket = global.matches[matchId].connected[socket];
         var player = getPlayerBySocket(playerSocket);
@@ -190,7 +190,7 @@ async function startMatch(io, matchId)
     io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize, config.hints]);
     
     //send players data about their weapon config
-    for(var socket in global.matches[matchId].connected)
+    for(var socket = 0; socket < global.matches[matchId].connected.length; socket++)
     {
         var playerSocket = global.matches[matchId].connected[socket];
         var player = getPlayerBySocket(playerSocket);
@@ -204,7 +204,7 @@ async function startMatch(io, matchId)
 
 function getPlayerBySocket(socket)
 {
-    for(var player in global.players)
+    for(var player = 0; player < global.players.length; player++)
     {
         if(global.players[player].socket === socket)
             return global.players[player];
@@ -214,7 +214,7 @@ function getPlayerBySocket(socket)
 
 function getPlayerById(id)
 {
-    for(var player in global.players)
+    for(var player = 0; player < global.players.length; player++)
     {
         if(global.players[player].id === id)
             return global.players[player];
@@ -317,11 +317,11 @@ function validCoordinates(player, x, y)
     }
 
     //check against obstacles
-    for(var obstacleKey in global.matches[player.matchId].obstaclesArray)
+    for(var obstacleKey = 0; obstacleKey < global.matches[player.matchId].obstaclesArray.length; obstacleKey++)
     {
         var obstacle = global.matches[player.matchId].obstaclesArray[obstacleKey];
         var hitbox = scaleHitboxToReal(obstacle.x, obstacle.y, config.obstacles[String(obstacle.type)].matchWidth, config.obstacles[String(obstacle.type)].matchHeight, config.obstacles[String(obstacle.type)].hitbox);
-        for(var polygon in hitbox)
+        for(var polygon = 0; polygon < hitbox.length; polygon++)
         {
             var isIntersecting = intersects.circlePolygon(x, y, playerDiameter / 2, hitbox[polygon]);
             if(isIntersecting)
@@ -346,7 +346,7 @@ function validCoordinates(player, x, y)
 function scaleHitboxToReal(x, y, width, height, hitbox)
 {
     var newHitbox = [];
-    for(var polygon in hitbox)
+    for(var polygon = 0; polygon < hitbox.length; polygon++)
     {
         newHitbox[polygon] = [];
         for(var polygonCoordinates = 0; polygonCoordinates < hitbox[polygon].length; polygonCoordinates++)
@@ -399,7 +399,7 @@ function handlePlayerReload(player)
     }
 }
 
-function handlePlayerGotShot(player, args)
+function handlePlayerGotShot(io, player, args)
 {
     if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
@@ -407,9 +407,61 @@ function handlePlayerGotShot(player, args)
         var killer = getPlayerById(args[0]);
         if(player.matchData.health < config.gameConfig.minHealth)
         {
+            //player killed
             if(killer !== null)
             {
-                //stuff to push to database for the killed player for their last match data
+                //todo: stuff to push to database for the killed player for their last match data
+
+                //spawn some goodies on the place where the player died
+                //initial range coordinates are just placeholders
+                var xRange = [50, 300];
+                var yRange = [50, 300];
+                var characterParameters = config.characters[String(player.playerData.character)];
+                var newSpawnables = []; //ids of spawnables
+                var rectanglesToCheckAgainst = []; //all obstacles & spawnables
+                var spawnablesToAdd = [];
+
+                //x, y range to spawn spawnables in it
+                xRange[0] = Math.floor(global.matches[player.matchId].playersObject[player.id].x - characterParameters.centerX * characterParameters.matchWidth);
+                xRange[1] = Math.floor(global.matches[player.matchId].playersObject[player.id].x + (1 - characterParameters.centerX) * characterParameters.matchWidth);
+                yRange[0] = Math.floor(global.matches[player.matchId].playersObject[player.id].y - characterParameters.centerY * characterParameters.matchHeight);
+                yRange[1] = Math.floor(global.matches[player.matchId].playersObject[player.id].y + (1 - characterParameters.centerY) * characterParameters.matchHeight);
+
+                newSpawnables.push(config.weapons[String(player.matchData.weapon.id)].ammoGivenWhenPlayerDies);
+                newSpawnables.push(config.characters[String(player.playerData.character)].healthGivenWhenPlayerDies);
+                if(player.matchData.weapon.hopup != 0)
+                    newSpawnables.push("weapons-" + player.matchData.weapon.id + "-hopups-" + player.matchData.weapon.hopup);
+                if(player.matchData.weapon.mag != 0)
+                    newSpawnables.push("weapons-" + player.matchData.weapon.id + "-mags-" + player.matchData.weapon.mag);
+
+                for(var obstacle = 0; obstacle < global.matches[player.matchId].obstaclesArray.length; obstacle++)
+                    rectanglesToCheckAgainst.push([global.matches[player.matchId].obstaclesArray[obstacle].x, global.matches[player.matchId].obstaclesArray[obstacle].y, global.matches[player.matchId].obstaclesArray[obstacle].width, global.matches[player.matchId].obstaclesArray[obstacle].height]);
+
+                for(var i = 0; i < newSpawnables.length; i++)
+                {
+                    var width = config.spawnables[newSpawnables[i]].matchWidth;
+                    var height = config.spawnables[newSpawnables[i]].matchHeight;
+                    var x = integerInInterval(xRange[0], xRange[1]);
+                    var y = integerInInterval(yRange[0], yRange[1]);
+
+                    for(var j = 0; j < rectanglesToCheckAgainst.length; j++)
+                    {
+                        var isIntersecting = intersects.boxBox(x, y, width, height, rectanglesToCheckAgainst[j][0], rectanglesToCheckAgainst[j][1], rectanglesToCheckAgainst[j][2], rectanglesToCheckAgainst[j][3]);
+                        if(isIntersecting)
+                        {
+                            x = integerInInterval(xRange[0], xRange[1]);
+                            y = integerInInterval(yRange[0], yRange[1]);
+                            j = -1;
+                        }
+                    }
+                    rectanglesToCheckAgainst.push([x, y, width, height]);
+                    spawnablesToAdd.push({id: newSpawnables[i], x: x, y: y, width: width, height: height, name: config.spawnables[newSpawnables[i]].name, type: config.spawnables[newSpawnables[i]].type, spriteKey: config.spawnables[newSpawnables[i]].spriteKey});
+                }
+
+                //update the world's spawnables
+                updateSpawnablesInWorld(io, player.matchId, -1, spawnablesToAdd);
+
+                //let killer, the killed person & other players know about the state of the game
                 killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
                 killer.matchData.kills++;
                 player.socket.emit("matchExt", "killed", [killer.nickname, Object.keys(global.matches[player.matchId].playersObject).length + "/" + global.matches[player.matchId].connectedToMatch]);
@@ -436,10 +488,10 @@ function handlePlayerPickItem(io, player)
         var spawnableKey = -1;
         var spawnablesToAdd = [];
 
-        for(var spawnable in global.matches[player.matchId].spawnablesArray)
+        for(var spawnable = 0; spawnable < global.matches[player.matchId].spawnablesArray.length; spawnable++)
         {
             let spawnableData = global.matches[player.matchId].spawnablesArray[spawnable];
-            if(intersects.boxCircle(spawnableData.x, spawnableData.y, spawnableData.width, spawnableData.height, global.matches[player.matchId].playersObject[player.id].x, global.matches[player.matchId].playersObject[player.id].y, global.matches[player.matchId].playersObject[player.id].hitboxDiameter))
+            if(intersects.boxCircle(spawnableData.x, spawnableData.y, spawnableData.width, spawnableData.height, global.matches[player.matchId].playersObject[player.id].x, global.matches[player.matchId].playersObject[player.id].y, global.matches[player.matchId].playersObject[player.id].hitboxDiameter / 2))
             {
                 spawnableKey = spawnable;
                 break;
@@ -540,8 +592,8 @@ function updateSpawnablesInWorld(io, matchId, keyToRemove, spawnablesToAdd)
     if(keyToRemove !== -1)
         global.matches[matchId].spawnablesArray.splice(keyToRemove, 1);
 
-    for(var spawnable in spawnablesToAdd)
-        global.matches[matchId].spawnablesArray.push(spawnablesToAdd[spawnable]);
+    for(var i = 0; i < spawnablesToAdd.length; i++)
+        global.matches[matchId].spawnablesArray.push(spawnablesToAdd[i]);
 
     io.to(String(matchId)).emit("matchExt", "spawnablesUpdate", [keyToRemove, spawnablesToAdd]);
 }

@@ -168,7 +168,7 @@ function leaveMatch(io, player)
     if(matchId)
     {
         player.socket.leave(String(matchId), () => {
-            for(var socket in global.matches[matchId].players)
+            for(var socket = 0; socket < global.matches[matchId].players.length; socket++)
             {
                 if(global.matches[matchId].players[socket] === player.socket)
                 {
@@ -260,7 +260,7 @@ function handleRequestMinPlayersForMatch(player)
 
 function handleDisconnection(io, socket)
 {
-    for(var player in global.players)
+    for(var player = 0; player < global.players.length; player++)
     {
         if(global.players[player].socket === socket)
         {

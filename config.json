@@ -243,6 +243,7 @@
         "0": {
             "name": "Rifle",
             "description": "Single-fire rifle",
+            "ammoGivenWhenPlayerDies": "weapons-0-ammo-2",
             "hopups": {
                 "0": {
                     "name": "No hopups",
@@ -309,7 +310,8 @@
             "centerX": 0.4,
             "centerY": 0.5,
             "bulletOriginX": 1,
-            "bulletOriginY": 0.55
+            "bulletOriginY": 0.55,
+            "healthGivenWhenPlayerDies": "spawnables-0-health-2"
         },
         "1": {
             "id": 1,
@@ -321,7 +323,8 @@
             "centerX": 0.4,
             "centerY": 0.5,
             "bulletOriginX": 1,
-            "bulletOriginY": 0.55
+            "bulletOriginY": 0.55,
+            "healthGivenWhenPlayerDies": "spawnables-0-health-2"
         }
     }
 }

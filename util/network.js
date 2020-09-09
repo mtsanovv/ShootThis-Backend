@@ -15,7 +15,7 @@ function init(io)
 
 function userConnected(io, socket)
 {
-    for(var player in global.players)
+    for(var player = 0; player < global.players.length; player++)
         if(global.players[player].IP == socket.request.connection.remoteAddress)
             global.players[player].socket.disconnect();
     

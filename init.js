@@ -27,7 +27,7 @@ global.serverId = params[2];
 global.serverDetails = serverData;
 
 for(var origin in config["origins"])
-  for(var port in config["origins"][origin].ports)
+  for(var port = 0; port < config["origins"][origin].ports.length; port++)
     global.origins.push(config["origins"][origin].protocol + origin + ":" + config["origins"][origin]["ports"][port]);
 
 cluster.init();
