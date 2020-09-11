@@ -31,7 +31,8 @@ matchExt RESPONSES:
     ammoUpdate => data about player's weapon - loaded & available ammo,
     spawnablesUpdate => data about removed spawnables and added spawnables,
     damageDealt => player id and damage dealt to them
-    showHint => hint to show
+    showHint => hint to show,
+    showEffectOnPlayer => id of player, effect to show, time
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -577,6 +578,7 @@ function handlePlayerPickItem(io, player)
                         player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
                         updateSpawnablesInWorld(io, player.matchId, spawnableKey, spawnablesToAdd);
                         player.socket.emit("matchExt", "showHint", [config.hints.healingHint + String(Math.round(config.gameConfig.timeToHeal / 100) / 10) + "s", config.gameConfig.timeToHeal]);
+                        io.to(String(player.matchId)).emit("matchExt", "showEffectOnPlayer", [player.id, "heal", config.gameConfig.timeToHeal]);
                     }
                     else
                         player.socket.emit("matchExt", "showHint", [config.hints.errorPickingHealth]);

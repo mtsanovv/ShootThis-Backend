@@ -22,8 +22,8 @@ This is the backend server, written in Node.js. The database engine used in the 
 4. It is recommended that you set up a new database user that can access only the newly created database. Make sure to adjust its parameters such as max connections per hour and max user connections to allow enough DB connections for each server.
 5. Edit the configuration in config.json:
 	- "errorCodes" are the error codes that the application may use
-	- "originsEnabled" is the option that enables or disables allowed hosts (see "origins" below). **By default it is set to TRUE. If you get connection errors, check if disabling this option and restarting the server will fix the issue - if it does, you have misconfigured the origins below.**
-	- "origins" are the allowed hosts with their respective ports (80, 443 usually). Change the name of the first one to "\*" and the ports it can access to \["\*"\] in order to allow any host to connect to the server.
+	- "originsEnabled" is the option that enables or disables allowed hosts (see "origins" below). **By default it is set to TRUE. If you get connection errors, check if disabling this option and restarting the server will fix the issue - if it does, you have misconfigured the origins below. Disabling this option allows ANY HOST to connect to the server.**
+	- "origins" are the allowed hosts with their respective ports (80, 443 usually)
 	- "redis" is the configuration for the redis-server
 	- "database" are the database details for the main database
 	- "servers" are the servers that can be started. The available types of servers are "login" and "game". An example has already been done. **Please note that if you run the different servers on different datacenters, all of them should have the same config.json.** Additionally, dbConnections is the size of the connection pool. Multiply that number by the number of threads on your system to figure out how many connections will be created (that's per server).
