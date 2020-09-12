@@ -1,4 +1,5 @@
 var logger = require('../util/logger.js');
+var errorHandler = require('../util/unhandledError.js');
 var db = require('../util/databaseInterface.js');
 var config = require('../config.json');
 var lodash = require('lodash');
@@ -16,7 +17,7 @@ class Player
         this.playerData = {};
         this.joinedOk = false;
         this.matchId = 0;
-        this.matchDataDefault = { lastActions: {lastMoved: 0, lastShot: 0, lastReloaded: 0, lastHealed: 0}, health: config.gameConfig.maxHealth, kills: 0, weapon: {id: 0, ammo: 0, hopup: 0, mag: 0, loadedAmmo: config.weapons[0].mags[0].ammoInMag} }
+        this.matchDataDefault = { lastActions: {lastMoved: 0, lastShot: 0, lastReloaded: 0, lastHealed: 0}, joinedMatch: 0, savedFinalData: false, health: config.gameConfig.maxHealth, damageDone: 0, kills: 0, weapon: {id: 0, ammo: 0, hopup: 0, mag: 0, loadedAmmo: config.weapons[0].mags[0].ammoInMag} }
         this.matchData = {};
         this.resetMatchData();
     }
@@ -61,6 +62,42 @@ class Player
                     this.playerData[key] = oldValue;
                 return callback(error);
             });
+        }
+    }
+
+    saveFinalMatchData(hasDied = true)
+    {
+        if(this.joinedOk)
+        {
+            if(!this.matchData.savedFinalData && this.matchData.joinedMatch && this.matchId && Object.keys(global.matches).indexOf(String(this.matchId)) !== -1)
+            {
+                this.playerData.kills += this.matchData.kills;
+                this.playerData.totalGames++;
+                if(hasDied)
+                    this.playerData.deaths++;
+
+                this.playerData.lastMatchKills = this.matchData.kills;
+                this.playerData.lastMatchDamageDone = this.matchData.damageDone;
+                this.playerData.lastMatchTimeElapsed = new Date().valueOf() - this.matchData.joinedMatch;
+                this.playerData.lastMatchPlacement = Object.keys(global.matches[this.matchId].playersObject).length + "/" + global.matches[this.matchId].connectedToMatch;
+                this.playerData.lastMatchXp = this.playerData.lastMatchKills * config.gameConfig.killsToXpMultiplier + this.playerData.lastMatchDamageDone + Math.floor(this.playerData.lastMatchTimeElapsed / 1000) + (global.matches[this.matchId].connectedToMatch - Object.keys(global.matches[this.matchId].playersObject).length) * config.gameConfig.placementToXpMultiplier;
+
+                this.playerData.xp += this.playerData.lastMatchXp;
+
+                while(this.playerData.xp >= config.gameConfig.xpToLevel)
+                {
+                    this.playerData.xp -= config.gameConfig.xpToLevel;
+                    this.playerData.level++;
+                }
+
+                var stringified = JSON.stringify(this.playerData);
+                this.matchData.savedFinalData = true;
+
+                this.database.updateColumnById(this.id, 'playerData', stringified, (error) => {
+                    if(error)
+                        errorHandler.logFatal(new Error("Failed to save final match data for player " + this.id + " when attempting to push data into the database."));
+                });
+            }
         }
     }
 }

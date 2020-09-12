@@ -73,6 +73,8 @@
         "maxMatchTime": 1200000,
         "timeToWaitBeforeMatch": 1000,
         "xpToLevel": 15000,
+        "killsToXpMultiplier": 50,
+        "placementToXpMultiplier": 100,
         "gameHeight": 7424,
         "gameWidth": 7424,
         "cameraBoundX": 8960,

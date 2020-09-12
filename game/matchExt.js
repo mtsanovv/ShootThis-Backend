@@ -31,8 +31,9 @@ matchExt RESPONSES:
     ammoUpdate => data about player's weapon - loaded & available ammo,
     spawnablesUpdate => data about removed spawnables and added spawnables,
     damageDealt => player id and damage dealt to them
-    showHint => hint to show,
+    showHint => hint to show
     showEffectOnPlayer => id of player, effect to show, time
+    win => respond with placement (obviously #1 out of how many) that the player has won
 */
 
 //!! IMPORTANT !! only the connected array from the match object is to be used in matchExt as not all players could have joined
@@ -170,6 +171,7 @@ async function startMatch(io, matchId)
                     j = -1;
                 }
             }
+            player.matchData.joinedMatch = new Date().valueOf();
             rectanglesToCheckAgainst.push([x - width / 2, y - height / 2, width, height]);
             global.matches[matchId].playersObject[player.id] = {character: player.playerData.character, nickname: player.nickname, x: x, y: y, rotation: 0, centerX: config.characters[String(player.playerData.character)].centerX, centerY: config.characters[String(player.playerData.character)].centerY, hitboxDiameter: config.characters[String(player.playerData.character)].hitboxDiameter};
             player.socket.emit("matchExt", "focusedPlayer", [player.id]);
@@ -234,7 +236,8 @@ function handleJoinMatchOk(player)
 
 function playerLeft(io, player)
 {
-    //the player at this point has already left the match and its room, but the matchId is still active
+    //this function is called only if the match has started
+    //the player at this point has already left the match and its room, but the matchId and matchData are still active
     if(!global.matches[player.matchId].connected.length && !global.matches[player.matchId].players.length && global.matches[player.matchId].connectionsCheckPassed)
     { 
         delete global.matches[player.matchId];
@@ -245,7 +248,11 @@ function playerLeft(io, player)
     {
         io.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
         if(Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
+        {
+            player.saveFinalMatchData(false);
             delete global.matches[player.matchId].playersObject[player.id];
+            checkForWinner(player.matchId);
+        }
     }
 }
 
@@ -406,12 +413,14 @@ function handlePlayerGotShot(io, player, args)
     {
         player.matchData.health -= args[1];
         var killer = getPlayerById(args[0]);
-        if(player.matchData.health < config.gameConfig.minHealth)
+        if(killer !== null)
         {
-            //player killed
-            if(killer !== null)
+            killer.matchData.damageDone += args[1];
+            if(player.matchData.health < config.gameConfig.minHealth)
             {
-                //todo: stuff to push to database for the killed player for their last match data
+                //player killed
+
+                player.saveFinalMatchData(); //save their match data
 
                 //spawn some goodies on the place where the player died
                 //initial range coordinates are just placeholders
@@ -463,18 +472,20 @@ function handlePlayerGotShot(io, player, args)
                 updateSpawnablesInWorld(io, player.matchId, -1, spawnablesToAdd);
 
                 //let killer, the killed person & other players know about the state of the game
-                killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
-                killer.matchData.kills++;
                 player.socket.emit("matchExt", "killed", [killer.nickname, Object.keys(global.matches[player.matchId].playersObject).length + "/" + global.matches[player.matchId].connectedToMatch]);
                 player.socket.to(String(player.matchId)).emit("matchExt", "playerLeft", [player.id]);
+                killer.socket.emit("matchExt", "playerKilled", [player.nickname]);
+                killer.matchData.kills++;
                 delete global.matches[player.matchId].playersObject[player.id];
+
+                checkForWinner(killer.matchId);
             }
-        }
-        else
-        {
-            player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
-            if(killer !== null)
-                killer.socket.emit("matchExt", "damageDealt", [player.id, args[1]]);
+            else
+            {
+                player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
+                if(killer !== null)
+                    killer.socket.emit("matchExt", "damageDealt", [player.id, args[1]]);
+            }
         }
     }
 }
@@ -598,6 +609,23 @@ function updateSpawnablesInWorld(io, matchId, keyToRemove, spawnablesToAdd)
         global.matches[matchId].spawnablesArray.push(spawnablesToAdd[i]);
 
     io.to(String(matchId)).emit("matchExt", "spawnablesUpdate", [keyToRemove, spawnablesToAdd]);
+}
+
+function checkForWinner(matchId)
+{
+    if(Object.keys(global.matches[matchId].playersObject).length === 1)
+    {
+        //we have a winner
+        var winner = getPlayerById(Number(Object.keys(global.matches[matchId].playersObject)[0]));
+        if(winner !== null)
+        {
+            winner.socket.emit("matchExt", "win", [Object.keys(global.matches[winner.matchId].playersObject).length + "/" + global.matches[winner.matchId].connectedToMatch]);
+            winner.saveFinalMatchData(false);
+            delete global.matches[winner.matchId].playersObject[winner.id];
+        }
+    }
+
+    return false;
 }
 
 module.exports.handleMatchPacket = handleMatchPacket;
