@@ -1,6 +1,6 @@
 # ShootThis-Backend
 
-A 2D HTML5 shooter, using the [Phaser 3](https://github.com/photonstorm/phaser/) engine.
+A 2D HTML5 battle royale, using the [Phaser 3](https://github.com/photonstorm/phaser/) engine.
 
 This is the backend server, written in Node.js. The database engine used in the creation process is MariaDB. The storage engine used is InnoDB.
 
