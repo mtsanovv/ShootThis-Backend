@@ -48,7 +48,7 @@
             "address": "127.0.0.1",
             "publicAddress": "//localhost",
             "port": 9905,
-            "displayName": "Sofia, BG",
+            "displayName": "Localhost",
             "protocol": "http:",
             "maxUsers": 450,
             "dbConnections": 20,
@@ -305,8 +305,8 @@
     "characters": {
         "0": {
             "id": 0,
-            "name": "HATH",
-            "title": "DESERT WARRIOR",
+            "name": "ELENUIT",
+            "title": "SHADOW LADY",
             "matchWidth": 116,
             "matchHeight": 95,
             "hitboxDiameter": 93,
@@ -319,7 +319,7 @@
         "1": {
             "id": 1,
             "name": "CHARACTER1",
-            "title": "INTERDESERT SKIRMISHER",
+            "title": "DESERT WARRIOR",
             "matchWidth": 116,
             "matchHeight": 95,
             "hitboxDiameter": 93,
