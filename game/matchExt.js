@@ -1,7 +1,8 @@
 var logger = require('../util/logger.js');
 var config = require('../config.json');
 var intersects = require('intersects');
-var lodash = require('lodash');
+var QuickSort = require('optimized-quicksort');
+const { Console } = require('console');
 
 /* 
 matchExt HANDLERS:
@@ -190,7 +191,7 @@ async function startMatch(io, matchId)
         }
     }
     
-    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize, config.hints]);
+    io.to(String(matchId)).emit("matchExt", "startMatch", [config.gameConfig.cameraBoundX, config.gameConfig.cameraBoundY, global.matches[matchId].playersObject, global.matches[matchId].obstaclesArray, global.matches[matchId].spawnablesArray, config.gameConfig.gameWidth, config.gameConfig.gameHeight, config.wallTiles.horizontal.height, biggestMagSize, config.hints, config.gameConfig.maxMatchTime]);
     
     //send players data about their weapon config
     for(var socket = 0; socket < global.matches[matchId].connected.length; socket++)
@@ -203,6 +204,44 @@ async function startMatch(io, matchId)
             player.socket.emit("matchExt", "healthUpdate", [player.matchData.health, config.gameConfig.healthBarMaxWidth, config.gameConfig.maxHealth]);
         }
     }
+
+    //waiting for match to end (if it hasn't ended manually)
+    await new Promise(resolve => setTimeout(resolve, config.gameConfig.maxMatchTime));
+
+    if(Object.keys(global.matches).indexOf(String(matchId)) !== -1)
+    {
+        if(!global.matches[matchId].matchEnded)
+        {
+            //match hasn't ended
+            var playerIds = Object.keys(global.matches[matchId].playersObject);
+            var playersLeft = [];
+            for(var i = 0; i < playerIds.length; i++)
+            {
+                var playerData = getPlayerById(Number(playerIds[i]));
+                if(playerData !== null)
+                    playersLeft.push(playerData);      
+            }
+            QuickSort.sort(playersLeft, compareHealth);
+            for(var i = playersLeft.length - 1; i > 0; i--)
+            {
+                playersLeft[i].saveFinalMatchData();
+                playersLeft[i].socket.emit("matchExt", "killed", ["ShootThis Match Timer", Object.keys(global.matches[matchId].playersObject).length + "/" + global.matches[matchId].connectedToMatch]);
+                playersLeft[i].socket.to(String(matchId)).emit("matchExt", "playerLeft", [playersLeft[i].id]);
+                delete global.matches[matchId].playersObject[playersLeft[i].id];
+            }
+            checkForWinner(matchId);
+        }
+    }
+}
+
+function compareHealth(player1, player2)
+{
+    if(player1.matchData.health < player2.matchData.health)
+        return 1;
+    if(player1.matchData.health > player2.matchData.health)
+        return -1;
+    else
+        return 0;
 }
 
 function getPlayerBySocket(socket)
@@ -621,6 +660,7 @@ function checkForWinner(matchId)
         {
             winner.socket.emit("matchExt", "win", [Object.keys(global.matches[winner.matchId].playersObject).length + "/" + global.matches[winner.matchId].connectedToMatch]);
             winner.saveFinalMatchData(false);
+            global.matches[winner.matchId].matchEnded = true;
             delete global.matches[winner.matchId].playersObject[winner.id];
         }
     }
