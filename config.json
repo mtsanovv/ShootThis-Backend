@@ -67,7 +67,7 @@
     },
     "gameConfig": {
         "maxPlayersPerMatch": 30,
-        "minPlayersPerMatch": 1,
+        "minPlayersPerMatch": 3,
         "votingQuorumNumerator": 2,
         "votingQuorumDenominator": 3,
         "maxMatchTime": 1200000,

@@ -12,7 +12,6 @@ gameExt (lobby) HANDLERS:
     changeCharacter => handleChangeCharacter
     joinMatch => handleJoinMatch
     cancelJoin => leaveMatch
-    requestMinPlayersForMatch => handleRequestMinPlayersForMatch
     voteChangeHost => handleVoteChangeHost
     startMatch => handleStartMatch
 */
@@ -27,7 +26,6 @@ gameExt (lobby) SERVER RESPONSES:
     changeCharacter => respond with the changed character if successful
     joinMatch => respond with data about the match (how many players in match, min players, max players, is the player the host)
     updateMatch => respond with data about the match (how many players in match, max players)
-    minPlayersForMatch => respond with the minimum amount of players, required to start a match, voting quorum numerator and denominator
     changeHost => respond with current count of players and whether the recipient is host or not
     startMatch => respond with the time that the user will wait before the match is started
 
@@ -62,9 +60,6 @@ function handleWorldPacket(io, player, requestType, args)
             break;
         case "cancelJoin":
             leaveMatch(io, player);
-            break;
-        case "requestMinPlayersForMatch":
-            handleRequestMinPlayersForMatch(player);
             break;
         case "voteChangeHost":
             handleVoteChangeHost(player);
@@ -251,11 +246,6 @@ function handleStartMatch(io, matchId, player = null)
     }
     io.to(String(matchId)).emit("gameExt", "startMatch", [config.gameConfig.timeToWaitBeforeMatch]);
     match.startMatch(io, matchId);
-}
-
-function handleRequestMinPlayersForMatch(player)
-{
-    player.socket.emit("gameExt", "minPlayersForMatch", [config.gameConfig.minPlayersPerMatch, config.gameConfig.votingQuorumNumerator, config.gameConfig.votingQuorumDenominator]);
 }
 
 function handleDisconnection(io, socket)
