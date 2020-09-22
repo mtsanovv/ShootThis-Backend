@@ -3,7 +3,7 @@ var os = require('os');
 var config = require('../config.json');
 var logger = require('./logger.js');
 var network = require('./network.js');
-var errorHandling = require('./unhandledError.js');
+var errorHandler = require('./unhandledError.js');
 var dbHandling = require('./databaseInterface.js');
 
 function init() 
@@ -15,7 +15,7 @@ function init()
         
         io.adapter(redis({ host: config["redis"].host, port: config["redis"].port }));
         
-        logger.log("Starting ShootThis-Backend for " + global.serverId + " on " + global.serverDetails.address + ":" + global.serverDetails.port);
+        logger.log("Starting ShootThis-Backend for " + global.serverId + " on " + global.serverDetails.address + ":" + global.serverDetails.port, 'gi');
 
         if(config.originsEnabled) 
         {
@@ -27,16 +27,15 @@ function init()
             cluster.fork();
         
         cluster.on('exit', function(worker, code, signal) {
-            logger.log('Worker ' + worker.process.pid + ' died');
             if(code === config.errorCodes.ERROR_CRITICAL)
             {
                 //121314 is the critical error code
-                errorHandling.criticalError({message: "Worker " + worker.process.pid + " has died with code " + code + ", which means that there's a critical error in the code. The app is being terminated for safety measures. Please refer to the logs."});
+                errorHandler.criticalError({message: "Worker " + worker.process.pid + " has died with code " + code + ", which means that there's a critical error in the code. The app is being terminated for safety measures. Please refer to the logs."});
                 process.exit(code);
             }
         }); 
 
-        errorHandling.init(false, io);
+        errorHandler.init(false, io);
     }
         
     if (cluster.isWorker) 
@@ -46,10 +45,17 @@ function init()
         
         io.adapter(redis({ host: config["redis"].host, port: config["redis"].port }));
 
+        io.of('/').adapter.on('error', (err) => {
+            errorHandler.criticalError(err);
+            // error in the pub/sub means that the workers cannot communicate between each other and
+            // the server has to be shut down
+            // redis seemed to be pretty stable, during all tests it never threw any errors
+        });
+
         if(config.originsEnabled) io.origins(global.origins);
 
         network.init(io);
-        errorHandling.init(true, io);
+        errorHandler.init(true, io);
         dbHandling.init();
     }
 }

@@ -1,5 +1,4 @@
 var logger = require('./logger.js');
-var db = require('./databaseInterface.js');
 var Player = require('../game/player.js');
 var login = require('../game/loginExt.js');
 var world = require('../game/gameExt.js');

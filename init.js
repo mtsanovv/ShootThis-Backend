@@ -1,6 +1,5 @@
 var params = process.argv;
 var config = require('./config.json');
-var logger = require('./util/logger.js');
 var cluster = require('./util/cluster.js');
 
 global.serverId;

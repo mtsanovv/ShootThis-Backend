@@ -1,6 +1,4 @@
-var config = require('../config.json');
 var Database = require('./database.js');
-var errorHandling = require('./unhandledError.js');
 
 var mysql;
 

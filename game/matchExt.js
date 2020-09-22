@@ -2,7 +2,6 @@ var logger = require('../util/logger.js');
 var config = require('../config.json');
 var intersects = require('intersects');
 var QuickSort = require('optimized-quicksort');
-const { Console } = require('console');
 
 /* 
 matchExt HANDLERS:

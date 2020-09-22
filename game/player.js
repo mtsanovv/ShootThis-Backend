@@ -1,4 +1,3 @@
-var logger = require('../util/logger.js');
 var errorHandler = require('../util/unhandledError.js');
 var db = require('../util/databaseInterface.js');
 var config = require('../config.json');
