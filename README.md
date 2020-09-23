@@ -46,6 +46,7 @@ This is the backend server, written for **Node.js version 12.18.1**. The databas
 
 - There was an intention to create a system that locks out the user after failing X login attempts. However, this is ineffective as it may be easily voided or may prevent the actual user from logging in. **This is why the best solution to the issue of eventual bruteforce is to set up some firewall rules.** ConfigServer Firewall (CSF) for some Linux distros has some useful perks for this, such as limiting connections that can be created from an IP per time period and number of connections that can be opened on a specific port per time period. Read more here: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-config-server-firewall-csf-on-ubuntu
 - The SQL file included contains the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
+- There may be visible lag when both moving and changing directions. This can only be fixed by getting a better ping and a server that can actually handle a lot of data at once. Tested on a 512 MB RAM and 100 Mbps link VPS from blazingfast.io and it feels like it needed the better 1 or 10 Gbps plan. It's definitely not the RAM, tested also on local PCs that have 16 GB RAM with 50 Mbps link speed and it was way worse.
 
 ## Authors
 - Web Design: M. Tsanov
