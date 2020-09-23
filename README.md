@@ -10,7 +10,7 @@ This is the backend server, written in Node.js. The database engine used in the 
 
 ## Demos
 
-- Trailer: TBA
+- Trailer: https://www.youtube.com/watch?v=CnBwuOsRmqI
 - Gameplay: TBA
 
 ## Instructions
