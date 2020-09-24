@@ -11,6 +11,10 @@
         "//192.168.191.1": {
             "ports": ["80", "4424"],
             "protocol": "http:"
+        },
+        "//5.206.227.98": {
+            "ports": ["80", "4424"],
+            "protocol": "http:"
         }
     },
     "redis": {
@@ -44,6 +48,15 @@
             "dbConnections": 50,
             "type": "login"
         },
+        "login3": {
+            "address": "5.206.227.98",
+            "port": 9907,
+            "displayName": "Login Server",
+            "protocol": "http:",
+            "maxUsers": 1000,
+            "dbConnections": 50,
+            "type": "login"
+        },
         "game1": {
             "address": "127.0.0.1",
             "publicAddress": "//localhost",
@@ -59,6 +72,16 @@
             "publicAddress": "//192.168.191.1",
             "port": 9906,
             "displayName": "Botevgrad, BG",
+            "protocol": "http:",
+            "maxUsers": 450,
+            "dbConnections": 20,
+            "type": "game"
+        },
+        "game3": {
+            "address": "5.206.227.98",
+            "publicAddress": "//5.206.227.98",
+            "port": 9909,
+            "displayName": "Amsterdam, NL",
             "protocol": "http:",
             "maxUsers": 450,
             "dbConnections": 20,
