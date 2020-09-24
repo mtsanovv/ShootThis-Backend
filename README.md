@@ -11,7 +11,7 @@ This is the backend server, written for **Node.js version 12.18.1**. The databas
 ## Demos
 
 - Trailer: https://www.youtube.com/watch?v=CnBwuOsRmqI
-- Gameplay: TBA
+- Gameplay: https://www.youtube.com/watch?v=5GN0ucv-P44
 
 ## Instructions
 
