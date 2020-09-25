@@ -274,14 +274,14 @@
         },
         "weapons-0-ammo-2": {
             "active": true,
-            "name": "Rifle 20 Ammo",
+            "name": "Rifle 15 Ammo",
             "type": "spawnablesSprites",
             "spriteKey": "5.png",
             "matchWidth": 43,
             "matchHeight": 25,
             "minSpawnCount": 100,
             "maxSpawnCount": 120,
-            "ammoGiven": 20
+            "ammoGiven": 15
         }
     },
     "weapons": {
