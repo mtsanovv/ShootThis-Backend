@@ -257,8 +257,8 @@
             "spriteKey": "3.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 100,
-            "maxSpawnCount": 120,
+            "minSpawnCount": 95,
+            "maxSpawnCount": 105,
             "ammoGiven": 5
         },
         "weapons-0-ammo-1": {
@@ -268,8 +268,8 @@
             "spriteKey": "4.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 100,
-            "maxSpawnCount": 120,
+            "minSpawnCount": 70,
+            "maxSpawnCount": 80,
             "ammoGiven": 10
         },
         "weapons-0-ammo-2": {
@@ -279,8 +279,8 @@
             "spriteKey": "5.png",
             "matchWidth": 43,
             "matchHeight": 25,
-            "minSpawnCount": 100,
-            "maxSpawnCount": 120,
+            "minSpawnCount": 45,
+            "maxSpawnCount": 55,
             "ammoGiven": 15
         }
     },
