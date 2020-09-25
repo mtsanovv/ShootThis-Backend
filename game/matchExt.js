@@ -58,7 +58,7 @@ function handleMatchPacket(io, player, requestType, args)
             handlePlayerGotShot(io, player, args);
             break;
         case "reload":
-            handlePlayerReload(player);
+            handlePlayerReload(io, player);
             break;
         case "pickItem":
             handlePlayerPickItem(io, player);
@@ -422,7 +422,7 @@ function handlePlayerShoot(io, player)
     }
 }
 
-function handlePlayerReload(player)
+function handlePlayerReload(io, player)
 {
     var now = new Date().valueOf();
     var weaponParameters = config.weapons[String(player.matchData.weapon.id)].hopups[String(player.matchData.weapon.hopup)];
@@ -441,6 +441,8 @@ function handlePlayerReload(player)
             player.matchData.weapon.ammo -= weaponAmmo.ammoInMag - player.matchData.weapon.loadedAmmo;
             player.matchData.weapon.loadedAmmo = weaponAmmo.ammoInMag;
         }
+        player.socket.emit("matchExt", "showHint", [config.hints.reloadingHint + String(Math.round(weaponParameters.timeToReload / 100) / 10) + "s", weaponParameters.timeToReload]);
+        io.to(String(player.matchId)).emit("matchExt", "showEffectOnPlayer", [player.id, "reload", weaponParameters.timeToReload]);
         player.socket.emit("matchExt", "ammoUpdate", [player.matchData.weapon.loadedAmmo, player.matchData.weapon.ammo]);
     }
 }
