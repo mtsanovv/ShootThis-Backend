@@ -431,7 +431,7 @@ function handlePlayerReload(player)
     if((now - player.matchData.lastActions.lastHealed) > config.gameConfig.timeToHeal && (now - player.matchData.lastActions.lastShot) > weaponParameters.timeBetweenFire && (now - player.matchData.lastActions.lastReloaded) > weaponParameters.timeToReload && player.matchData.weapon.loadedAmmo < weaponAmmo.ammoInMag && player.matchData.weapon.ammo > 0 && Object.keys(global.matches[player.matchId].playersObject).indexOf(String(player.id)) !== -1)
     {
         player.matchData.lastActions.lastReloaded = now;
-        if(player.matchData.weapon.ammo - weaponAmmo.ammoInMag < 0)
+        if(player.matchData.weapon.ammo - (weaponAmmo.ammoInMag - player.matchData.weapon.loadedAmmo) < 0)
         {
             player.matchData.weapon.loadedAmmo += player.matchData.weapon.ammo;
             player.matchData.weapon.ammo = 0;

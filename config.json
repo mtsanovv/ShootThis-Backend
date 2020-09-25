@@ -90,7 +90,7 @@
     },
     "gameConfig": {
         "maxPlayersPerMatch": 30,
-        "minPlayersPerMatch": 3,
+        "minPlayersPerMatch": 1,
         "votingQuorumNumerator": 2,
         "votingQuorumDenominator": 3,
         "maxMatchTime": 1200000,
@@ -120,7 +120,8 @@
         "errorPickingHealth": "You already have full health",
         "errorAttachingMag1": "You already have this mag",
         "errorAttachingMag2": "You already have a better mag",
-        "healingHint": "Healing for "
+        "healingHint": "Healing for ",
+        "reloadingHint": "Reloading for "
     },
     "wallTiles": {
         "horizontal": {
@@ -274,7 +275,7 @@
                 "0": {
                     "name": "No hopups",
                     "damagePerShot": 12,
-                    "timeToReload": 400,
+                    "timeToReload": 2000,
                     "timeBetweenFire": 250,
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
@@ -285,7 +286,7 @@
                 "1": {
                     "name": "Piercer",
                     "damagePerShot": 15,
-                    "timeToReload": 400,
+                    "timeToReload": 2000,
                     "timeBetweenFire": 250,
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
@@ -296,7 +297,7 @@
                 "2": {
                     "name": "Speedfire",
                     "damagePerShot": 12,
-                    "timeToReload": 200,
+                    "timeToReload": 2000,
                     "timeBetweenFire": 150,
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
