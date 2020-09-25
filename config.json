@@ -174,8 +174,8 @@
             "spriteKey": "01.png",
             "matchWidth": 35,
             "matchHeight": 35,
-            "minSpawnCount": 5,
-            "maxSpawnCount": 8
+            "minSpawnCount": 0,
+            "maxSpawnCount": 2
         },
         "weapons-0-hopups-2": {
             "active": true,
@@ -184,8 +184,8 @@
             "spriteKey": "02.png",
             "matchWidth": 35,
             "matchHeight": 35,
-            "minSpawnCount": 5,
-            "maxSpawnCount": 8
+            "minSpawnCount": 1,
+            "maxSpawnCount": 5
         },
         "weapons-0-mags-1": {
             "active": true,
