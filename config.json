@@ -315,7 +315,7 @@
                 "2": {
                     "name": "Speedfire",
                     "damagePerShot": 12,
-                    "timeToReload": 2000,
+                    "timeToReload": 1500,
                     "timeBetweenFire": 150,
                     "bulletTravelTime": 500,
                     "bulletTravelDistance": 400,
