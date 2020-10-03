@@ -7,14 +7,6 @@
         "//localhost": {
             "ports": ["80", "4424"],
             "protocol": "http:"
-        },
-        "//192.168.191.1": {
-            "ports": ["80", "4424"],
-            "protocol": "http:"
-        },
-        "//5.206.227.98": {
-            "ports": ["80", "4424"],
-            "protocol": "http:"
         }
     },
     "redis": {
@@ -39,24 +31,6 @@
             "dbConnections": 50,
             "type": "login"
         },
-        "login2": {
-            "address": "192.168.191.1",
-            "port": 9904,
-            "displayName": "Login Server",
-            "protocol": "http:",
-            "maxUsers": 1000,
-            "dbConnections": 50,
-            "type": "login"
-        },
-        "login3": {
-            "address": "5.206.227.98",
-            "port": 9907,
-            "displayName": "Login Server",
-            "protocol": "http:",
-            "maxUsers": 1000,
-            "dbConnections": 50,
-            "type": "login"
-        },
         "game1": {
             "address": "127.0.0.1",
             "publicAddress": "//localhost",
@@ -66,31 +40,11 @@
             "maxUsers": 450,
             "dbConnections": 20,
             "type": "game"
-        },
-        "game2": {
-            "address": "192.168.191.1",
-            "publicAddress": "//192.168.191.1",
-            "port": 9906,
-            "displayName": "Botevgrad, BG",
-            "protocol": "http:",
-            "maxUsers": 450,
-            "dbConnections": 20,
-            "type": "game"
-        },
-        "game3": {
-            "address": "5.206.227.98",
-            "publicAddress": "//5.206.227.98",
-            "port": 9909,
-            "displayName": "Amsterdam, NL",
-            "protocol": "http:",
-            "maxUsers": 450,
-            "dbConnections": 20,
-            "type": "game"
         }
     },
     "gameConfig": {
         "maxPlayersPerMatch": 30,
-        "minPlayersPerMatch": 1,
+        "minPlayersPerMatch": 3,
         "votingQuorumNumerator": 2,
         "votingQuorumDenominator": 3,
         "maxMatchTime": 1200000,
