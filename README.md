@@ -15,6 +15,8 @@ This is the backend server, written for **Node.js version 12.18.1**. The databas
 
 ## Instructions
 
+Before you begin, you need to have a MySQL/MariaDB server running (as well as a web server to access the actual game). For testing purposes, if you cannot setup a MySQL/MariaDB server and/or a web server, use [XAMPP](https://www.apachefriends.org/download.html). We have used it to test the game on our personal Windows PCs, for the playtests we used an Ubuntu server and installed manually mysql-server and nginx.
+
 *Assuming you have* ```npm``` *and Node.js installed:*
 1. Install redis-server if you don't have it.
 2. Run ```npm install socket.io mysql2 socket.io-redis bcryptjs intersects lodash optimized-quicksort chalk```
@@ -46,15 +48,12 @@ This is the backend server, written for **Node.js version 12.18.1**. The databas
 
 - There was an intention to create a system that locks out the user after failing X login attempts. However, this is ineffective as it may be easily voided or may prevent the actual user from logging in. **This is why the best solution to the issue of eventual bruteforce is to set up some firewall rules.** ConfigServer Firewall (CSF) for some Linux distros has some useful perks for this, such as limiting connections that can be created from an IP per time period and number of connections that can be opened on a specific port per time period. Read more here: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-config-server-firewall-csf-on-ubuntu
 - The SQL file included contains the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
-- There may be visible lag when both moving and changing directions. This can only be fixed by getting a better ping and a server that can actually handle a lot of data at once. Tested on a 512 MB RAM and 100 Mbps link VPS from blazingfast.io and it feels like it needed the better 1 or 10 Gbps plan. It's definitely not the RAM, tested also on local PCs that have 16 GB RAM with 50 Mbps link speed and it was way worse.
+- There may be stutter when moving sometimes. This means that either you cannot exchange data with the server fast enough or the server cannot process the data fast enough. During initial playtests, the original server (512 MB RAM, 2.5 GHz 4-core Xeon, 100Mbps link speed) we had was facing this issue. We upgraded to a 1GB RAM, 2.5 GHz 4-core Xeon with 1Gbps link speed and it did well.
 
 ## Authors
 - Web Design: M. Tsanov
 - Game Design: S. Tsvetkov
 - Artwork: M. Tsanov, S. Tsvetkov
 - Backend: M. Tsanov, Y. Berov
-
-## Credits
-- Server structure ideas, database manager and a few other snippets: https://github.com/HagridHD/Auroris/
 
 *M. Tsanov, S. Tsvetkov, Y. Berov, 2020*
