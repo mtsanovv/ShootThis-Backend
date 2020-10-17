@@ -46,6 +46,8 @@ Before you begin, you need to have a MySQL/MariaDB server running (as well as a 
 - By default, the client-server connection is configured as http, which is EXTREMELY insecure BECAUSE PASSWORDS ARE SENT IN PLAINTEXT. ALWAYS USE HTTPS WHENEVER SENDING PLAINTEXT PASSWORDS!
 ```
 
+**For using secure (https) connections for the ShootThis-Backend servers, please refer to the [SSL configuration for ShootThis-Backend servers](README-SSL.md)**.
+
 - There was an intention to create a system that locks out the user after failing X login attempts. However, this is ineffective as it may be easily voided or may prevent the actual user from logging in. **This is why the best solution to the issue of eventual bruteforce is to set up some firewall rules.** ConfigServer Firewall (CSF) for some Linux distros has some useful perks for this, such as limiting connections that can be created from an IP per time period and number of connections that can be opened on a specific port per time period. Read more here: https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-config-server-firewall-csf-on-ubuntu
 - The SQL file included contains the structure of the database that is used for ShootThis **and it is required by both the frontend and the backend.**
 - There may be stutter when moving sometimes. This means that either you cannot exchange data with the server fast enough or the server cannot process the data fast enough. During initial playtests, the original server (512 MB RAM, 2.5 GHz 4-core Xeon, 100Mbps link speed) we had was facing this issue. We upgraded to a 1GB RAM, 2.5 GHz 4-core Xeon with 1Gbps link speed and it did well.

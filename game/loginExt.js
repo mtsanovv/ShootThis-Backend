@@ -112,7 +112,7 @@ function handleLoginSuccessful(player, username)
                         var serverList = [];
                         for(var server in config["servers"])
                         {
-                            if(config["servers"][server].type == "game")
+                            if(config["servers"][server].type == "game" && config["servers"][server].showInServerList)
                                 serverList.push(config["servers"][server].protocol + config["servers"][server].publicAddress + ":" + config["servers"][server].port);
                         }
                         player.socket.emit("loginExt", "ls", [[username, hash], serverList]);

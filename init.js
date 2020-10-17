@@ -16,9 +16,22 @@ var serverData = config["servers"][params[2]];
 
 if(!serverData)
 {
-  var message =  "Invalid server. Available servers are: ";
+  var message =  "Invalid server. The available servers are: ";
   for(var i in config["servers"])
-    message += i + " ";
+  {
+    if(!config["servers"][i].isDummy)
+      message += i + " ";
+  }
+  return console.log(message);
+}
+else if(serverData.isDummy)
+{
+  var message =  "This is a dummy server and it cannot be started. The available servers are: ";
+  for(var i in config["servers"])
+  {
+    if(!config["servers"][i].isDummy)
+      message += i + " ";
+  }
   return console.log(message);
 }
 

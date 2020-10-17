@@ -39,7 +39,9 @@
             "protocol": "http:",
             "maxUsers": 450,
             "dbConnections": 20,
-            "type": "game"
+            "type": "game",
+            "showInServerList": true,
+            "isDummy": false
         }
     },
     "gameConfig": {
