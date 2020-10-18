@@ -316,15 +316,15 @@
         },
         "1": {
             "id": 1,
-            "name": "CHARACTER1",
+            "name": "SECKER",
             "title": "DESERT WARRIOR",
-            "matchWidth": 116,
+            "matchWidth": 130,
             "matchHeight": 95,
             "hitboxDiameter": 93,
-            "centerX": 0.4,
-            "centerY": 0.5,
+            "centerX": 0.38,
+            "centerY": 0.53,
             "bulletOriginX": 1,
-            "bulletOriginY": 0.55,
+            "bulletOriginY": 0.53,
             "healthGivenWhenPlayerDies": "spawnables-0-health-2"
         }
     }
