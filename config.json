@@ -51,7 +51,7 @@
         "votingQuorumDenominator": 3,
         "maxMatchTime": 1200000,
         "timeToWaitBeforeMatch": 15000,
-        "xpToLevel": 15000,
+        "xpToLevel": 5000,
         "killsToXpMultiplier": 50,
         "placementToXpMultiplier": 100,
         "gameHeight": 7424,
