@@ -97,7 +97,7 @@ server {
 
 The configuration is exactly the same as the login server, only the port numbers are different. Our actual ShootThis-Backend game1 game server is running on http://5.206.227.98:9909 and the proxy is https://shootthis.tk:8809. After you have created a server block for one login server, you need to create more for all the other login servers (that is, if you have more than one). Now, you need to edit config.json in ShootThis-Backend. You shouldn't add the proxy server as a separate ShootThis-Backend server for the login servers, but you have to do so for the game servers. We already had game1 occupied by the actual game server (**we made sure showInServerList and isDummy are set to false** for game1) and so we created game2 (a dummy game server for the proxy server) as follows:
 ```
-"game4": {
+"game2": {
     "protocol": "https:",
     "publicAddress": "//shootthis.tk",
     "port": 8809,
